@@ -1,0 +1,23 @@
+:root { --ink:#1c2b24; --bg:#f5f6f2; --card:#fff; --line:#dde2db; --brand:#1f4d3a; --due:#b3402f; --ok:#2f7d4f; --warn:#c98a1b; }
+* { box-sizing: border-box; }
+body { margin:0; background:var(--bg); color:var(--ink); font:15px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif; }
+main { max-width:1000px; margin:0 auto; padding:20px; }
+h1 { font-size:24px; margin:0 0 12px; } h2 { font-size:18px; margin:24px 0 8px; }
+.top { background:var(--brand); color:#fff; padding:10px 20px; display:flex; flex-wrap:wrap; gap:8px 18px; align-items:center; }
+.top a { color:#fff; text-decoration:none; opacity:.85; padding:4px 0; } .top a:hover { opacity:1; text-decoration:underline; }
+.top b { margin-right:12px; }
+.card { background:var(--card); border:1px solid var(--line); border-radius:8px; padding:14px; margin-bottom:16px; }
+.tw { overflow-x:auto; }
+table { border-collapse:collapse; width:100%; min-width:520px; }
+th,td { text-align:left; padding:7px 9px; border-bottom:1px solid var(--line); white-space:nowrap; }
+td.n,th.n { text-align:right; font-variant-numeric:tabular-nums; }
+form.grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:10px; align-items:end; }
+form.inline { display:inline-flex; gap:6px; }
+label { display:flex; flex-direction:column; gap:3px; font-size:13px; color:#66736c; }
+input,select,textarea { font:inherit; padding:7px; border:1px solid var(--line); border-radius:6px; background:#fff; color:var(--ink); }
+button,.btn { background:var(--brand); color:#fff; border:0; border-radius:6px; padding:8px 14px; font:inherit; font-weight:600; cursor:pointer; text-decoration:none; display:inline-block; }
+button.sec,.btn.sec { background:transparent; color:var(--ink); border:1px solid var(--line); padding:4px 9px; font-size:13px; }
+.msg { padding:9px 12px; border-radius:6px; margin-bottom:12px; } .msg.err { background:#f7e1dd; color:var(--due); } .msg.ok { background:#dff0e5; color:var(--ok); }
+.tag { padding:1px 8px; border-radius:10px; color:#fff; font-size:12px; } .tag.g{background:var(--ok)} .tag.y{background:var(--warn)} .tag.r{background:var(--due)} .tag.n{background:#9aa49e}
+.void { opacity:.5; text-decoration:line-through; }
+@media print { .top, .noprint { display:none !important; } body { background:#fff; } }

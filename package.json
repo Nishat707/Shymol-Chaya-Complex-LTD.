@@ -1,0 +1,29 @@
+{
+  "name": "shymol-chaya",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "prisma generate && next build",
+    "start": "next start",
+    "db:migrate": "prisma migrate dev",
+    "db:deploy": "prisma migrate deploy",
+    "db:seed": "tsx prisma/seed.ts",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.0.0",
+    "@supabase/ssr": "^0.5.0",
+    "@supabase/supabase-js": "^2.45.0",
+    "next": "^15.0.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "prisma": "^6.0.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.0"
+  }
+}

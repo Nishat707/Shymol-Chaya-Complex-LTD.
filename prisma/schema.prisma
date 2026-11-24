@@ -1,0 +1,185 @@
+generator client { provider = "prisma-client-js" }
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum Role { SUPER_ADMIN MANAGER }
+enum Occupancy { OCCUPIED VACANT }
+enum PayMethod { CASH BANK_TRANSFER MOBILE_FINANCIAL_SERVICE OTHER }
+enum ExpenseStatus { RECORDED PAID VOID }
+enum Priority { NORMAL IMPORTANT URGENT }
+enum TaskStatus { PENDING IN_PROGRESS COMPLETED CANCELLED }
+
+// Staff accounts (Super Admin / Manager). Residents live in FlatResident.
+model User {
+  id          String   @id @default(cuid())
+  email       String   @unique
+  name        String?
+  role        Role
+  active      Boolean  @default(true)
+  permissions Json     @default("{}")
+  createdAt   DateTime @default(now())
+}
+
+model Flat {
+  id           String     @id @default(cuid())
+  number       String     @unique
+  floor        Int
+  ownerName    String?
+  tenantName   String?
+  phone        String?
+  occupancy    Occupancy  @default(OCCUPIED)
+  customCharge Decimal?   @db.Decimal(12, 2)
+  residents    FlatResident[]
+  charges      MonthlyCharge[]
+  payments     Payment[]
+  @@index([floor])
+}
+
+// Approved Google accounts. Only these emails may sign in as residents.
+model FlatResident {
+  id     String  @id @default(cuid())
+  flatId String
+  flat   Flat    @relation(fields: [flatId], references: [id])
+  email  String  @unique
+  name   String?
+  active Boolean @default(true)
+}
+
+// Default charge history. The latest row with effectiveFrom <= the month applies.
+model ChargeSetting {
+  id            String   @id @default(cuid())
+  amount        Decimal  @db.Decimal(12, 2)
+  effectiveFrom DateTime @db.Date
+  createdAt     DateTime @default(now())
+}
+
+// One row per flat per month. amount is a snapshot and is never recalculated.
+model MonthlyCharge {
+  id          String   @id @default(cuid())
+  flatId      String
+  flat        Flat     @relation(fields: [flatId], references: [id])
+  month       String   // "YYYY-MM" in Asia/Dhaka
+  amount      Decimal  @db.Decimal(12, 2)
+  waived      Decimal  @default(0) @db.Decimal(12, 2)
+  waiverNote  String?
+  createdAt   DateTime @default(now())
+  allocations PaymentAllocation[]
+  @@unique([flatId, month])
+  @@index([month])
+}
+
+model Payment {
+  id          String   @id @default(cuid())
+  receiptNo   String   @unique
+  flatId      String
+  flat        Flat     @relation(fields: [flatId], references: [id])
+  amount      Decimal  @db.Decimal(12, 2)
+  receivedOn  DateTime @db.Date
+  method      PayMethod
+  reference   String?
+  notes       String?
+  proofUrl    String?
+  createdById String
+  createdAt   DateTime @default(now())
+  voidedAt    DateTime?
+  voidReason  String?
+  allocations PaymentAllocation[]
+  @@index([flatId])
+  @@index([receivedOn])
+}
+
+model PaymentAllocation {
+  id        String        @id @default(cuid())
+  paymentId String
+  payment   Payment       @relation(fields: [paymentId], references: [id])
+  chargeId  String
+  charge    MonthlyCharge @relation(fields: [chargeId], references: [id])
+  amount    Decimal       @db.Decimal(12, 2)
+  @@index([chargeId])
+}
+
+model ExpenseCategory {
+  id       String  @id @default(cuid())
+  name     String  @unique
+  active   Boolean @default(true)
+  expenses Expense[]
+}
+
+// Recording an expense is separate from paying it: status RECORDED vs PAID.
+model Expense {
+  id          String        @id @default(cuid())
+  title       String
+  categoryId  String
+  category    ExpenseCategory @relation(fields: [categoryId], references: [id])
+  amount      Decimal       @db.Decimal(12, 2)
+  expenseDate DateTime      @db.Date
+  vendor      String?
+  description String?
+  method      PayMethod?
+  receiptUrl  String?
+  status      ExpenseStatus @default(RECORDED)
+  paidOn      DateTime?     @db.Date
+  voidReason  String?
+  createdById String
+  createdAt   DateTime      @default(now())
+  tasks       MaintenanceTask[]
+  @@index([expenseDate])
+  @@index([status])
+}
+
+model MaintenanceTask {
+  id            String     @id @default(cuid())
+  title         String
+  description   String?
+  assignee      String?
+  status        TaskStatus @default(PENDING)
+  startDate     DateTime?  @db.Date
+  expectedEnd   DateTime?  @db.Date
+  completedOn   DateTime?  @db.Date
+  estimatedCost Decimal?   @db.Decimal(12, 2)
+  actualCost    Decimal?   @db.Decimal(12, 2)
+  expenseId     String?
+  expense       Expense?   @relation(fields: [expenseId], references: [id])
+  createdAt     DateTime   @default(now())
+}
+
+model Notice {
+  id          String   @id @default(cuid())
+  title       String
+  body        String
+  priority    Priority @default(NORMAL)
+  publishedAt DateTime @default(now())
+  expiresAt   DateTime?
+  createdById String
+}
+
+model MonthClose {
+  month      String   @id // "YYYY-MM"
+  closedAt   DateTime @default(now())
+  closedById String
+}
+
+model Counter {
+  key   String @id
+  value Int
+}
+model Setting {
+  key   String @id
+  value String
+}
+
+model AuditLog {
+  id       String   @id @default(cuid())
+  at       DateTime @default(now())
+  actorId  String
+  action   String
+  entity   String
+  entityId String
+  before   Json?
+  after    Json?
+  reason   String?
+  @@index([entity, entityId])
+}

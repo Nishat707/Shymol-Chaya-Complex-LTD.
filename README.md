@@ -1,0 +1,68 @@
+# Shymol Chaya Complex LTD. — Apartment Management System
+
+Next.js (App Router, TypeScript) · Prisma · PostgreSQL on Supabase · Google sign-in via Supabase · Vercel.
+
+> **Status: working draft, not yet run end to end.** It was written without the ability to install packages or run
+> the app, so expect to fix small errors on first run. Follow "First run" below and fix anything that breaks
+> before relying on it for real money.
+
+## What works (by design)
+| Area | Details |
+|---|---|
+| Flats | 50 flats seeded (2A–2B, 3A–10F). Edit owner/tenant/phone/occupancy/custom charge. Ledger per flat. |
+| Residents | Admin registers each Google email against a flat. Unregistered Google accounts are rejected. Residents see only their own flat, read-only. |
+| Billing | Default charge with effective-date history, per-flat overrides, idempotent monthly generation; billed amounts are snapshots and never change. |
+| Payments | Oldest-month-first allocation, partial and multi-month, overpayment rejected, unique receipt numbers, printable receipt, void with reason, CSV export. |
+| Expenses | 12 seeded categories; "recorded" vs "paid" are separate; void with reason. |
+| Balance | Opening balance + money received − expenses paid. Unpaid charges and unpaid expenses are not counted. |
+| Notices | Publish with priority and expiry; shown on the resident page. |
+| Roles | Super Admin: everything. Manager: payments, expenses, flats, residents, notices, bill generation. Only Super Admin: default charge, opening balance, month closing, managers. |
+| Safety | Month closing locks payments/expenses/bills; audit log for changes; DB triggers block deleting financial rows; CHECK constraints; row-level security. |
+
+## Not built yet
+Charts, PDF/Excel exports (CSV for payments only), file uploads (receipts/proofs), maintenance task screens
+(table exists), expense category management screen, configurable Manager permissions (roles are fixed in code),
+reports pages, search/filters, automated tests beyond `tests/allocate.test.ts`. Ask for these next.
+
+## Requirements
+Node.js 20+, VS Code (install the recommended extensions when prompted), a free Supabase account, a Google Cloud account.
+
+## First run (local, VS Code)
+1. Unzip, then `File > Open Folder` in VS Code. Open a terminal.
+2. `npm install`
+3. `npm test` (checks the payment allocation logic)
+4. Create a Supabase project (region **Singapore**). Copy `.env.example` to `.env` and fill it in:
+   - Project Settings > API: URL and anon key.
+   - Project Settings > Database > Connection string: pooled (port 6543) for `DATABASE_URL`, direct (5432) for `DIRECT_URL`.
+   - `SUPER_ADMIN_EMAIL` = the Google account you will use to sign in as Super Admin.
+5. Google sign-in:
+   - Google Cloud Console > APIs & Services > Credentials > Create OAuth client ID (Web application).
+     Authorized redirect URI: `https://YOUR-PROJECT.supabase.co/auth/v1/callback`.
+   - Supabase > Authentication > Providers > Google: enable, paste client ID and secret.
+   - Supabase > Authentication > URL Configuration: Site URL `http://localhost:3000`; add redirect `http://localhost:3000/**`
+     (and your Vercel URL later).
+6. Create the database tables: `npx prisma migrate dev --name init`
+   This generates `prisma/migrations/`. **Commit that folder to GitHub**; it is your migration history.
+7. Apply the integrity rules: `psql "$DIRECT_URL" -f prisma/constraints.sql`
+   (or paste the file into Supabase > SQL Editor and run it).
+8. Seed: `npm run db:seed`
+9. `npm run dev`, open http://localhost:3000/login, sign in with the Super Admin Google account.
+10. Settings > "Generate monthly bills" for each month you want billed. Then Flats > open a flat > add the resident's Google email.
+
+## Deploy (GitHub + Vercel)
+1. Create a **private** GitHub repo and push this folder (`.env` is git-ignored).
+2. Vercel > Add New Project > import the repo. Region: Singapore (sin1). Add the same variables as `.env`,
+   with `NEXT_PUBLIC_SITE_URL` set to your Vercel URL.
+3. Add the Vercel URL under Supabase > Authentication > URL Configuration.
+4. Run once against production: `npm run db:deploy` (with production `DATABASE_URL`/`DIRECT_URL`), then the constraints SQL and the seed.
+5. Add a second Super Admin or keep your Google account recoverable, so you cannot be locked out.
+
+## Project layout
+- `prisma/schema.prisma` data model · `prisma/constraints.sql` DB rules · `prisma/seed.ts` initial data
+- `lib/allocate.ts, billing.ts, payments.ts, finance.ts` money rules · `lib/actions.ts` all admin write actions
+- `lib/session.ts` approved-email access control · `app/auth/callback` Google login return
+- `app/admin/*` staff screens · `app/resident` resident screen · `app/globals.css` styling
+
+## Backups
+Free Supabase projects may not include automatic backups. Use a paid plan or schedule `pg_dump` exports.
+Never put keys in chat or commit `.env`.
