@@ -8,3 +8,5 @@ shymol-chaya-app.zip
 !.env.example
 node_modules
 .next
+.prisma-composer/
+.alchemy/
