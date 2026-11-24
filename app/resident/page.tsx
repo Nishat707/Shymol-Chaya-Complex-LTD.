@@ -1,15 +1,21 @@
-import { prisma } from "@/lib/db";
+import { or } from "@prisma/orm-postgres/orm-client";
+import { db } from "@/lib/db";
 import { requireResident } from "@/lib/session";
 import { taka } from "@/lib/dates";
 
 export default async function Resident() {
   const s = await requireResident();
+  const d = db();
   // Scoped by the session's flat ids. Residents can never query another flat.
-  const flats = await prisma.flat.findMany({
-    where: { id: { in: s.flatIds } },
-    include: { charges: { orderBy: { month: "desc" }, include: { allocations: { where: { payment: { voidedAt: null } } } } } },
-  });
-  const notices = await prisma.notice.findMany({ where: { OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }] }, orderBy: { publishedAt: "desc" }, take: 5 });
+  const flats = await d.orm.public.Flat
+    .where((f) => f.id.in(s.flatIds))
+    .include("charges", (c) => c.orderBy((ch) => ch.month.desc()).include("allocations", (al) => al.where((x) => x.payment.some((p) => p.voidedAt.isNull()))))
+    .all();
+  const notices = await d.orm.public.Notice
+    .where((n) => or(n.expiresAt.isNull(), n.expiresAt.gt(new Date())))
+    .orderBy((n) => n.publishedAt.desc())
+    .limit(5)
+    .all();
   return (
     <>
       <h1>Welcome to Shymol Chaya Complex LTD.</h1>

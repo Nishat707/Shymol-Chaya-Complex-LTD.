@@ -1,8 +1,8 @@
-import { prisma } from "@/lib/db";
+import { db } from "@/lib/db";
 import { addNotice } from "@/lib/actions";
 import { Msg } from "@/components/Msg";
 export default async function Notices({ searchParams }: { searchParams: Promise<{ err?: string; ok?: string }> }) {
-  const sp = await searchParams; const list = await prisma.notice.findMany({ orderBy: { publishedAt: "desc" }, take: 30 });
+  const sp = await searchParams; const list = await db().orm.public.Notice.orderBy((n) => n.publishedAt.desc()).limit(30).all();
   return (
     <>
       <h1>Notices</h1><Msg sp={sp} />

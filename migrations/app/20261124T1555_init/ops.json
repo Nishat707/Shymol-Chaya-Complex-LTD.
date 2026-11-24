@@ -1,0 +1,1922 @@
+[
+  {
+    "id": "schema.public",
+    "label": "Create schema \"public\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres"
+    },
+    "precheck": [],
+    "execute": [
+      {
+        "description": "Create schema \"public\"",
+        "sql": "CREATE SCHEMA IF NOT EXISTS \"public\"",
+        "params": []
+      }
+    ],
+    "postcheck": []
+  },
+  {
+    "id": "createNativeEnumType.ExpenseStatus",
+    "label": "Create enum type \"ExpenseStatus\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "type",
+        "name": "ExpenseStatus"
+      }
+    },
+    "precheck": [],
+    "execute": [
+      {
+        "description": "create enum type \"ExpenseStatus\"",
+        "sql": "CREATE TYPE \"public\".\"ExpenseStatus\" AS ENUM ('RECORDED', 'PAID', 'VOID')",
+        "params": []
+      }
+    ],
+    "postcheck": []
+  },
+  {
+    "id": "createNativeEnumType.Occupancy",
+    "label": "Create enum type \"Occupancy\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "type",
+        "name": "Occupancy"
+      }
+    },
+    "precheck": [],
+    "execute": [
+      {
+        "description": "create enum type \"Occupancy\"",
+        "sql": "CREATE TYPE \"public\".\"Occupancy\" AS ENUM ('OCCUPIED', 'VACANT')",
+        "params": []
+      }
+    ],
+    "postcheck": []
+  },
+  {
+    "id": "createNativeEnumType.PayMethod",
+    "label": "Create enum type \"PayMethod\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "type",
+        "name": "PayMethod"
+      }
+    },
+    "precheck": [],
+    "execute": [
+      {
+        "description": "create enum type \"PayMethod\"",
+        "sql": "CREATE TYPE \"public\".\"PayMethod\" AS ENUM ('CASH', 'BANK_TRANSFER', 'MOBILE_FINANCIAL_SERVICE', 'OTHER')",
+        "params": []
+      }
+    ],
+    "postcheck": []
+  },
+  {
+    "id": "createNativeEnumType.Priority",
+    "label": "Create enum type \"Priority\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "type",
+        "name": "Priority"
+      }
+    },
+    "precheck": [],
+    "execute": [
+      {
+        "description": "create enum type \"Priority\"",
+        "sql": "CREATE TYPE \"public\".\"Priority\" AS ENUM ('NORMAL', 'IMPORTANT', 'URGENT')",
+        "params": []
+      }
+    ],
+    "postcheck": []
+  },
+  {
+    "id": "createNativeEnumType.Role",
+    "label": "Create enum type \"Role\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "type",
+        "name": "Role"
+      }
+    },
+    "precheck": [],
+    "execute": [
+      {
+        "description": "create enum type \"Role\"",
+        "sql": "CREATE TYPE \"public\".\"Role\" AS ENUM ('SUPER_ADMIN', 'MANAGER')",
+        "params": []
+      }
+    ],
+    "postcheck": []
+  },
+  {
+    "id": "createNativeEnumType.TaskStatus",
+    "label": "Create enum type \"TaskStatus\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "type",
+        "name": "TaskStatus"
+      }
+    },
+    "precheck": [],
+    "execute": [
+      {
+        "description": "create enum type \"TaskStatus\"",
+        "sql": "CREATE TYPE \"public\".\"TaskStatus\" AS ENUM ('PENDING', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED')",
+        "params": []
+      }
+    ],
+    "postcheck": []
+  },
+  {
+    "id": "table.AuditLog",
+    "label": "Create table \"AuditLog\"",
+    "summary": "Creates table \"AuditLog\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "AuditLog"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"AuditLog\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"AuditLog\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "table \"AuditLog\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"AuditLog\"",
+        "sql": "CREATE TABLE \"public\".\"AuditLog\" (\n  \"action\" text NOT NULL,\n  \"actorId\" text NOT NULL,\n  \"after\" jsonb,\n  \"at\" timestamp(3) DEFAULT (now()) NOT NULL,\n  \"before\" jsonb,\n  \"entity\" text NOT NULL,\n  \"entityId\" text NOT NULL,\n  \"id\" text NOT NULL,\n  \"reason\" text,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"AuditLog\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3))) AS \"result\"",
+        "params": [
+          "\"public\".\"AuditLog\"",
+          "r",
+          "p"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "table \"AuditLog\""
+        }
+      }
+    ]
+  },
+  {
+    "id": "table.ChargeSetting",
+    "label": "Create table \"ChargeSetting\"",
+    "summary": "Creates table \"ChargeSetting\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "ChargeSetting"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"ChargeSetting\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"ChargeSetting\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "table \"ChargeSetting\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"ChargeSetting\"",
+        "sql": "CREATE TABLE \"public\".\"ChargeSetting\" (\n  \"amount\" numeric(12,2) NOT NULL,\n  \"createdAt\" timestamp(3) DEFAULT (now()) NOT NULL,\n  \"effectiveFrom\" date NOT NULL,\n  \"id\" text NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"ChargeSetting\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3))) AS \"result\"",
+        "params": [
+          "\"public\".\"ChargeSetting\"",
+          "r",
+          "p"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "table \"ChargeSetting\""
+        }
+      }
+    ]
+  },
+  {
+    "id": "table.Counter",
+    "label": "Create table \"Counter\"",
+    "summary": "Creates table \"Counter\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "Counter"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"Counter\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Counter\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "table \"Counter\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"Counter\"",
+        "sql": "CREATE TABLE \"public\".\"Counter\" (\n  \"key\" text NOT NULL,\n  \"value\" int4 NOT NULL,\n  PRIMARY KEY (\"key\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"Counter\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3))) AS \"result\"",
+        "params": [
+          "\"public\".\"Counter\"",
+          "r",
+          "p"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "table \"Counter\""
+        }
+      }
+    ]
+  },
+  {
+    "id": "table.Expense",
+    "label": "Create table \"Expense\"",
+    "summary": "Creates table \"Expense\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "Expense"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"Expense\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Expense\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "table \"Expense\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"Expense\"",
+        "sql": "CREATE TABLE \"public\".\"Expense\" (\n  \"amount\" numeric(12,2) NOT NULL,\n  \"categoryId\" text NOT NULL,\n  \"createdAt\" timestamp(3) DEFAULT (now()) NOT NULL,\n  \"createdById\" text NOT NULL,\n  \"description\" text,\n  \"expenseDate\" date NOT NULL,\n  \"id\" text NOT NULL,\n  \"method\" \"PayMethod\",\n  \"paidOn\" date,\n  \"receiptUrl\" text,\n  \"status\" \"ExpenseStatus\" DEFAULT 'RECORDED'::\"ExpenseStatus\" NOT NULL,\n  \"title\" text NOT NULL,\n  \"vendor\" text,\n  \"voidReason\" text,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"Expense\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3))) AS \"result\"",
+        "params": [
+          "\"public\".\"Expense\"",
+          "r",
+          "p"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "table \"Expense\""
+        }
+      }
+    ]
+  },
+  {
+    "id": "table.ExpenseCategory",
+    "label": "Create table \"ExpenseCategory\"",
+    "summary": "Creates table \"ExpenseCategory\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "ExpenseCategory"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"ExpenseCategory\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"ExpenseCategory\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "table \"ExpenseCategory\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"ExpenseCategory\"",
+        "sql": "CREATE TABLE \"public\".\"ExpenseCategory\" (\n  \"active\" bool DEFAULT true NOT NULL,\n  \"id\" text NOT NULL,\n  \"name\" text NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"ExpenseCategory\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3))) AS \"result\"",
+        "params": [
+          "\"public\".\"ExpenseCategory\"",
+          "r",
+          "p"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "table \"ExpenseCategory\""
+        }
+      }
+    ]
+  },
+  {
+    "id": "table.Flat",
+    "label": "Create table \"Flat\"",
+    "summary": "Creates table \"Flat\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "Flat"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"Flat\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Flat\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "table \"Flat\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"Flat\"",
+        "sql": "CREATE TABLE \"public\".\"Flat\" (\n  \"customCharge\" numeric(12,2),\n  \"floor\" int4 NOT NULL,\n  \"id\" text NOT NULL,\n  \"number\" text NOT NULL,\n  \"occupancy\" \"Occupancy\" DEFAULT 'OCCUPIED'::\"Occupancy\" NOT NULL,\n  \"ownerName\" text,\n  \"phone\" text,\n  \"tenantName\" text,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"Flat\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3))) AS \"result\"",
+        "params": [
+          "\"public\".\"Flat\"",
+          "r",
+          "p"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "table \"Flat\""
+        }
+      }
+    ]
+  },
+  {
+    "id": "table.FlatResident",
+    "label": "Create table \"FlatResident\"",
+    "summary": "Creates table \"FlatResident\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "FlatResident"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"FlatResident\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"FlatResident\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "table \"FlatResident\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"FlatResident\"",
+        "sql": "CREATE TABLE \"public\".\"FlatResident\" (\n  \"active\" bool DEFAULT true NOT NULL,\n  \"email\" text NOT NULL,\n  \"flatId\" text NOT NULL,\n  \"id\" text NOT NULL,\n  \"name\" text,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"FlatResident\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3))) AS \"result\"",
+        "params": [
+          "\"public\".\"FlatResident\"",
+          "r",
+          "p"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "table \"FlatResident\""
+        }
+      }
+    ]
+  },
+  {
+    "id": "table.MaintenanceTask",
+    "label": "Create table \"MaintenanceTask\"",
+    "summary": "Creates table \"MaintenanceTask\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "MaintenanceTask"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"MaintenanceTask\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"MaintenanceTask\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "table \"MaintenanceTask\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"MaintenanceTask\"",
+        "sql": "CREATE TABLE \"public\".\"MaintenanceTask\" (\n  \"actualCost\" numeric(12,2),\n  \"assignee\" text,\n  \"completedOn\" date,\n  \"createdAt\" timestamp(3) DEFAULT (now()) NOT NULL,\n  \"description\" text,\n  \"estimatedCost\" numeric(12,2),\n  \"expectedEnd\" date,\n  \"expenseId\" text,\n  \"id\" text NOT NULL,\n  \"startDate\" date,\n  \"status\" \"TaskStatus\" DEFAULT 'PENDING'::\"TaskStatus\" NOT NULL,\n  \"title\" text NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"MaintenanceTask\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3))) AS \"result\"",
+        "params": [
+          "\"public\".\"MaintenanceTask\"",
+          "r",
+          "p"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "table \"MaintenanceTask\""
+        }
+      }
+    ]
+  },
+  {
+    "id": "table.MonthClose",
+    "label": "Create table \"MonthClose\"",
+    "summary": "Creates table \"MonthClose\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "MonthClose"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"MonthClose\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"MonthClose\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "table \"MonthClose\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"MonthClose\"",
+        "sql": "CREATE TABLE \"public\".\"MonthClose\" (\n  \"closedAt\" timestamp(3) DEFAULT (now()) NOT NULL,\n  \"closedById\" text NOT NULL,\n  \"month\" text NOT NULL,\n  PRIMARY KEY (\"month\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"MonthClose\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3))) AS \"result\"",
+        "params": [
+          "\"public\".\"MonthClose\"",
+          "r",
+          "p"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "table \"MonthClose\""
+        }
+      }
+    ]
+  },
+  {
+    "id": "table.MonthlyCharge",
+    "label": "Create table \"MonthlyCharge\"",
+    "summary": "Creates table \"MonthlyCharge\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "MonthlyCharge"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"MonthlyCharge\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"MonthlyCharge\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "table \"MonthlyCharge\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"MonthlyCharge\"",
+        "sql": "CREATE TABLE \"public\".\"MonthlyCharge\" (\n  \"amount\" numeric(12,2) NOT NULL,\n  \"createdAt\" timestamp(3) DEFAULT (now()) NOT NULL,\n  \"flatId\" text NOT NULL,\n  \"id\" text NOT NULL,\n  \"month\" text NOT NULL,\n  \"waived\" numeric(12,2) DEFAULT '0.00'::numeric(12,2) NOT NULL,\n  \"waiverNote\" text,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"MonthlyCharge\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3))) AS \"result\"",
+        "params": [
+          "\"public\".\"MonthlyCharge\"",
+          "r",
+          "p"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "table \"MonthlyCharge\""
+        }
+      }
+    ]
+  },
+  {
+    "id": "table.Notice",
+    "label": "Create table \"Notice\"",
+    "summary": "Creates table \"Notice\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "Notice"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"Notice\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Notice\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "table \"Notice\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"Notice\"",
+        "sql": "CREATE TABLE \"public\".\"Notice\" (\n  \"body\" text NOT NULL,\n  \"createdById\" text NOT NULL,\n  \"expiresAt\" timestamp(3),\n  \"id\" text NOT NULL,\n  \"priority\" \"Priority\" DEFAULT 'NORMAL'::\"Priority\" NOT NULL,\n  \"publishedAt\" timestamp(3) DEFAULT (now()) NOT NULL,\n  \"title\" text NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"Notice\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3))) AS \"result\"",
+        "params": [
+          "\"public\".\"Notice\"",
+          "r",
+          "p"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "table \"Notice\""
+        }
+      }
+    ]
+  },
+  {
+    "id": "table.Payment",
+    "label": "Create table \"Payment\"",
+    "summary": "Creates table \"Payment\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "Payment"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"Payment\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Payment\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "table \"Payment\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"Payment\"",
+        "sql": "CREATE TABLE \"public\".\"Payment\" (\n  \"amount\" numeric(12,2) NOT NULL,\n  \"createdAt\" timestamp(3) DEFAULT (now()) NOT NULL,\n  \"createdById\" text NOT NULL,\n  \"flatId\" text NOT NULL,\n  \"id\" text NOT NULL,\n  \"method\" \"PayMethod\" NOT NULL,\n  \"notes\" text,\n  \"proofUrl\" text,\n  \"receiptNo\" text NOT NULL,\n  \"receivedOn\" date NOT NULL,\n  \"reference\" text,\n  \"voidReason\" text,\n  \"voidedAt\" timestamp(3),\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"Payment\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3))) AS \"result\"",
+        "params": [
+          "\"public\".\"Payment\"",
+          "r",
+          "p"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "table \"Payment\""
+        }
+      }
+    ]
+  },
+  {
+    "id": "table.PaymentAllocation",
+    "label": "Create table \"PaymentAllocation\"",
+    "summary": "Creates table \"PaymentAllocation\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "PaymentAllocation"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"PaymentAllocation\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"PaymentAllocation\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "table \"PaymentAllocation\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"PaymentAllocation\"",
+        "sql": "CREATE TABLE \"public\".\"PaymentAllocation\" (\n  \"amount\" numeric(12,2) NOT NULL,\n  \"chargeId\" text NOT NULL,\n  \"id\" text NOT NULL,\n  \"paymentId\" text NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"PaymentAllocation\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3))) AS \"result\"",
+        "params": [
+          "\"public\".\"PaymentAllocation\"",
+          "r",
+          "p"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "table \"PaymentAllocation\""
+        }
+      }
+    ]
+  },
+  {
+    "id": "table.Setting",
+    "label": "Create table \"Setting\"",
+    "summary": "Creates table \"Setting\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "Setting"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"Setting\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Setting\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "table \"Setting\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"Setting\"",
+        "sql": "CREATE TABLE \"public\".\"Setting\" (\n  \"key\" text NOT NULL,\n  \"value\" text NOT NULL,\n  PRIMARY KEY (\"key\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"Setting\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3))) AS \"result\"",
+        "params": [
+          "\"public\".\"Setting\"",
+          "r",
+          "p"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "table \"Setting\""
+        }
+      }
+    ]
+  },
+  {
+    "id": "table.User",
+    "label": "Create table \"User\"",
+    "summary": "Creates table \"User\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "User"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"User\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"User\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "table \"User\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"User\"",
+        "sql": "CREATE TABLE \"public\".\"User\" (\n  \"active\" bool DEFAULT true NOT NULL,\n  \"createdAt\" timestamp(3) DEFAULT (now()) NOT NULL,\n  \"email\" text NOT NULL,\n  \"id\" text NOT NULL,\n  \"name\" text,\n  \"permissions\" jsonb DEFAULT '{}'::jsonb NOT NULL,\n  \"role\" \"Role\" NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"User\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3))) AS \"result\"",
+        "params": [
+          "\"public\".\"User\"",
+          "r",
+          "p"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "table \"User\""
+        }
+      }
+    ]
+  },
+  {
+    "id": "index.AuditLog.AuditLog_entity_entityId_idx",
+    "label": "Create index \"AuditLog_entity_entityId_idx\" on \"AuditLog\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "AuditLog_entity_entityId_idx",
+        "table": "AuditLog"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"AuditLog_entity_entityId_idx\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"AuditLog_entity_entityId_idx\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "index \"AuditLog_entity_entityId_idx\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"AuditLog_entity_entityId_idx\"",
+        "sql": "CREATE INDEX \"AuditLog_entity_entityId_idx\" ON \"public\".\"AuditLog\" (\"entity\", \"entityId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"AuditLog_entity_entityId_idx\" exists on \"AuditLog\" with the planned definition",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" INNER JOIN \"pg_index\" AS \"i\" ON \"i\".\"indexrelid\" = \"c\".\"oid\" INNER JOIN \"pg_am\" AS \"m\" ON \"m\".\"oid\" = \"c\".\"relam\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3) AND \"i\".\"indrelid\" = to_regclass($4) AND NOT (\"i\".\"indisunique\") AND \"m\".\"amname\" = $5 AND (\"i\".\"indexprs\" IS NULL AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"i\".\"indkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"i\".\"indrelid\" AND key_attribute.attnum = key_column.attnum) = ($6)::jsonb) AND \"i\".\"indpred\" IS NULL)) AS \"result\"",
+        "params": [
+          "\"public\".\"AuditLog_entity_entityId_idx\"",
+          "i",
+          "I",
+          "\"public\".\"AuditLog\"",
+          "btree",
+          "[\"entity\",\"entityId\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.Expense.Expense_expenseDate_idx",
+    "label": "Create index \"Expense_expenseDate_idx\" on \"Expense\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "Expense_expenseDate_idx",
+        "table": "Expense"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"Expense_expenseDate_idx\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Expense_expenseDate_idx\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "index \"Expense_expenseDate_idx\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"Expense_expenseDate_idx\"",
+        "sql": "CREATE INDEX \"Expense_expenseDate_idx\" ON \"public\".\"Expense\" (\"expenseDate\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"Expense_expenseDate_idx\" exists on \"Expense\" with the planned definition",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" INNER JOIN \"pg_index\" AS \"i\" ON \"i\".\"indexrelid\" = \"c\".\"oid\" INNER JOIN \"pg_am\" AS \"m\" ON \"m\".\"oid\" = \"c\".\"relam\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3) AND \"i\".\"indrelid\" = to_regclass($4) AND NOT (\"i\".\"indisunique\") AND \"m\".\"amname\" = $5 AND (\"i\".\"indexprs\" IS NULL AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"i\".\"indkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"i\".\"indrelid\" AND key_attribute.attnum = key_column.attnum) = ($6)::jsonb) AND \"i\".\"indpred\" IS NULL)) AS \"result\"",
+        "params": [
+          "\"public\".\"Expense_expenseDate_idx\"",
+          "i",
+          "I",
+          "\"public\".\"Expense\"",
+          "btree",
+          "[\"expenseDate\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.Expense.Expense_status_idx",
+    "label": "Create index \"Expense_status_idx\" on \"Expense\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "Expense_status_idx",
+        "table": "Expense"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"Expense_status_idx\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Expense_status_idx\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "index \"Expense_status_idx\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"Expense_status_idx\"",
+        "sql": "CREATE INDEX \"Expense_status_idx\" ON \"public\".\"Expense\" (\"status\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"Expense_status_idx\" exists on \"Expense\" with the planned definition",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" INNER JOIN \"pg_index\" AS \"i\" ON \"i\".\"indexrelid\" = \"c\".\"oid\" INNER JOIN \"pg_am\" AS \"m\" ON \"m\".\"oid\" = \"c\".\"relam\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3) AND \"i\".\"indrelid\" = to_regclass($4) AND NOT (\"i\".\"indisunique\") AND \"m\".\"amname\" = $5 AND (\"i\".\"indexprs\" IS NULL AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"i\".\"indkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"i\".\"indrelid\" AND key_attribute.attnum = key_column.attnum) = ($6)::jsonb) AND \"i\".\"indpred\" IS NULL)) AS \"result\"",
+        "params": [
+          "\"public\".\"Expense_status_idx\"",
+          "i",
+          "I",
+          "\"public\".\"Expense\"",
+          "btree",
+          "[\"status\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.ExpenseCategory.ExpenseCategory_name_key",
+    "label": "Create index \"ExpenseCategory_name_key\" on \"ExpenseCategory\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "ExpenseCategory_name_key",
+        "table": "ExpenseCategory"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"ExpenseCategory_name_key\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"ExpenseCategory_name_key\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "index \"ExpenseCategory_name_key\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"ExpenseCategory_name_key\"",
+        "sql": "CREATE UNIQUE INDEX \"ExpenseCategory_name_key\" ON \"public\".\"ExpenseCategory\" (\"name\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"ExpenseCategory_name_key\" exists on \"ExpenseCategory\" with the planned definition",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" INNER JOIN \"pg_index\" AS \"i\" ON \"i\".\"indexrelid\" = \"c\".\"oid\" INNER JOIN \"pg_am\" AS \"m\" ON \"m\".\"oid\" = \"c\".\"relam\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3) AND \"i\".\"indrelid\" = to_regclass($4) AND \"i\".\"indisunique\" AND \"m\".\"amname\" = $5 AND (\"i\".\"indexprs\" IS NULL AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"i\".\"indkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"i\".\"indrelid\" AND key_attribute.attnum = key_column.attnum) = ($6)::jsonb) AND \"i\".\"indpred\" IS NULL)) AS \"result\"",
+        "params": [
+          "\"public\".\"ExpenseCategory_name_key\"",
+          "i",
+          "I",
+          "\"public\".\"ExpenseCategory\"",
+          "btree",
+          "[\"name\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.Flat.Flat_floor_idx",
+    "label": "Create index \"Flat_floor_idx\" on \"Flat\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "Flat_floor_idx",
+        "table": "Flat"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"Flat_floor_idx\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Flat_floor_idx\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "index \"Flat_floor_idx\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"Flat_floor_idx\"",
+        "sql": "CREATE INDEX \"Flat_floor_idx\" ON \"public\".\"Flat\" (\"floor\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"Flat_floor_idx\" exists on \"Flat\" with the planned definition",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" INNER JOIN \"pg_index\" AS \"i\" ON \"i\".\"indexrelid\" = \"c\".\"oid\" INNER JOIN \"pg_am\" AS \"m\" ON \"m\".\"oid\" = \"c\".\"relam\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3) AND \"i\".\"indrelid\" = to_regclass($4) AND NOT (\"i\".\"indisunique\") AND \"m\".\"amname\" = $5 AND (\"i\".\"indexprs\" IS NULL AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"i\".\"indkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"i\".\"indrelid\" AND key_attribute.attnum = key_column.attnum) = ($6)::jsonb) AND \"i\".\"indpred\" IS NULL)) AS \"result\"",
+        "params": [
+          "\"public\".\"Flat_floor_idx\"",
+          "i",
+          "I",
+          "\"public\".\"Flat\"",
+          "btree",
+          "[\"floor\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.Flat.Flat_number_key",
+    "label": "Create index \"Flat_number_key\" on \"Flat\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "Flat_number_key",
+        "table": "Flat"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"Flat_number_key\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Flat_number_key\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "index \"Flat_number_key\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"Flat_number_key\"",
+        "sql": "CREATE UNIQUE INDEX \"Flat_number_key\" ON \"public\".\"Flat\" (\"number\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"Flat_number_key\" exists on \"Flat\" with the planned definition",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" INNER JOIN \"pg_index\" AS \"i\" ON \"i\".\"indexrelid\" = \"c\".\"oid\" INNER JOIN \"pg_am\" AS \"m\" ON \"m\".\"oid\" = \"c\".\"relam\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3) AND \"i\".\"indrelid\" = to_regclass($4) AND \"i\".\"indisunique\" AND \"m\".\"amname\" = $5 AND (\"i\".\"indexprs\" IS NULL AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"i\".\"indkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"i\".\"indrelid\" AND key_attribute.attnum = key_column.attnum) = ($6)::jsonb) AND \"i\".\"indpred\" IS NULL)) AS \"result\"",
+        "params": [
+          "\"public\".\"Flat_number_key\"",
+          "i",
+          "I",
+          "\"public\".\"Flat\"",
+          "btree",
+          "[\"number\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.FlatResident.FlatResident_email_key",
+    "label": "Create index \"FlatResident_email_key\" on \"FlatResident\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "FlatResident_email_key",
+        "table": "FlatResident"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"FlatResident_email_key\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"FlatResident_email_key\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "index \"FlatResident_email_key\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"FlatResident_email_key\"",
+        "sql": "CREATE UNIQUE INDEX \"FlatResident_email_key\" ON \"public\".\"FlatResident\" (\"email\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"FlatResident_email_key\" exists on \"FlatResident\" with the planned definition",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" INNER JOIN \"pg_index\" AS \"i\" ON \"i\".\"indexrelid\" = \"c\".\"oid\" INNER JOIN \"pg_am\" AS \"m\" ON \"m\".\"oid\" = \"c\".\"relam\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3) AND \"i\".\"indrelid\" = to_regclass($4) AND \"i\".\"indisunique\" AND \"m\".\"amname\" = $5 AND (\"i\".\"indexprs\" IS NULL AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"i\".\"indkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"i\".\"indrelid\" AND key_attribute.attnum = key_column.attnum) = ($6)::jsonb) AND \"i\".\"indpred\" IS NULL)) AS \"result\"",
+        "params": [
+          "\"public\".\"FlatResident_email_key\"",
+          "i",
+          "I",
+          "\"public\".\"FlatResident\"",
+          "btree",
+          "[\"email\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.MonthlyCharge.MonthlyCharge_flatId_month_key",
+    "label": "Create index \"MonthlyCharge_flatId_month_key\" on \"MonthlyCharge\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "MonthlyCharge_flatId_month_key",
+        "table": "MonthlyCharge"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"MonthlyCharge_flatId_month_key\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"MonthlyCharge_flatId_month_key\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "index \"MonthlyCharge_flatId_month_key\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"MonthlyCharge_flatId_month_key\"",
+        "sql": "CREATE UNIQUE INDEX \"MonthlyCharge_flatId_month_key\" ON \"public\".\"MonthlyCharge\" (\"flatId\", \"month\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"MonthlyCharge_flatId_month_key\" exists on \"MonthlyCharge\" with the planned definition",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" INNER JOIN \"pg_index\" AS \"i\" ON \"i\".\"indexrelid\" = \"c\".\"oid\" INNER JOIN \"pg_am\" AS \"m\" ON \"m\".\"oid\" = \"c\".\"relam\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3) AND \"i\".\"indrelid\" = to_regclass($4) AND \"i\".\"indisunique\" AND \"m\".\"amname\" = $5 AND (\"i\".\"indexprs\" IS NULL AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"i\".\"indkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"i\".\"indrelid\" AND key_attribute.attnum = key_column.attnum) = ($6)::jsonb) AND \"i\".\"indpred\" IS NULL)) AS \"result\"",
+        "params": [
+          "\"public\".\"MonthlyCharge_flatId_month_key\"",
+          "i",
+          "I",
+          "\"public\".\"MonthlyCharge\"",
+          "btree",
+          "[\"flatId\",\"month\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.MonthlyCharge.MonthlyCharge_month_idx",
+    "label": "Create index \"MonthlyCharge_month_idx\" on \"MonthlyCharge\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "MonthlyCharge_month_idx",
+        "table": "MonthlyCharge"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"MonthlyCharge_month_idx\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"MonthlyCharge_month_idx\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "index \"MonthlyCharge_month_idx\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"MonthlyCharge_month_idx\"",
+        "sql": "CREATE INDEX \"MonthlyCharge_month_idx\" ON \"public\".\"MonthlyCharge\" (\"month\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"MonthlyCharge_month_idx\" exists on \"MonthlyCharge\" with the planned definition",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" INNER JOIN \"pg_index\" AS \"i\" ON \"i\".\"indexrelid\" = \"c\".\"oid\" INNER JOIN \"pg_am\" AS \"m\" ON \"m\".\"oid\" = \"c\".\"relam\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3) AND \"i\".\"indrelid\" = to_regclass($4) AND NOT (\"i\".\"indisunique\") AND \"m\".\"amname\" = $5 AND (\"i\".\"indexprs\" IS NULL AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"i\".\"indkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"i\".\"indrelid\" AND key_attribute.attnum = key_column.attnum) = ($6)::jsonb) AND \"i\".\"indpred\" IS NULL)) AS \"result\"",
+        "params": [
+          "\"public\".\"MonthlyCharge_month_idx\"",
+          "i",
+          "I",
+          "\"public\".\"MonthlyCharge\"",
+          "btree",
+          "[\"month\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.Payment.Payment_flatId_idx",
+    "label": "Create index \"Payment_flatId_idx\" on \"Payment\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "Payment_flatId_idx",
+        "table": "Payment"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"Payment_flatId_idx\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Payment_flatId_idx\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "index \"Payment_flatId_idx\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"Payment_flatId_idx\"",
+        "sql": "CREATE INDEX \"Payment_flatId_idx\" ON \"public\".\"Payment\" (\"flatId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"Payment_flatId_idx\" exists on \"Payment\" with the planned definition",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" INNER JOIN \"pg_index\" AS \"i\" ON \"i\".\"indexrelid\" = \"c\".\"oid\" INNER JOIN \"pg_am\" AS \"m\" ON \"m\".\"oid\" = \"c\".\"relam\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3) AND \"i\".\"indrelid\" = to_regclass($4) AND NOT (\"i\".\"indisunique\") AND \"m\".\"amname\" = $5 AND (\"i\".\"indexprs\" IS NULL AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"i\".\"indkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"i\".\"indrelid\" AND key_attribute.attnum = key_column.attnum) = ($6)::jsonb) AND \"i\".\"indpred\" IS NULL)) AS \"result\"",
+        "params": [
+          "\"public\".\"Payment_flatId_idx\"",
+          "i",
+          "I",
+          "\"public\".\"Payment\"",
+          "btree",
+          "[\"flatId\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.Payment.Payment_receiptNo_key",
+    "label": "Create index \"Payment_receiptNo_key\" on \"Payment\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "Payment_receiptNo_key",
+        "table": "Payment"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"Payment_receiptNo_key\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Payment_receiptNo_key\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "index \"Payment_receiptNo_key\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"Payment_receiptNo_key\"",
+        "sql": "CREATE UNIQUE INDEX \"Payment_receiptNo_key\" ON \"public\".\"Payment\" (\"receiptNo\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"Payment_receiptNo_key\" exists on \"Payment\" with the planned definition",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" INNER JOIN \"pg_index\" AS \"i\" ON \"i\".\"indexrelid\" = \"c\".\"oid\" INNER JOIN \"pg_am\" AS \"m\" ON \"m\".\"oid\" = \"c\".\"relam\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3) AND \"i\".\"indrelid\" = to_regclass($4) AND \"i\".\"indisunique\" AND \"m\".\"amname\" = $5 AND (\"i\".\"indexprs\" IS NULL AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"i\".\"indkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"i\".\"indrelid\" AND key_attribute.attnum = key_column.attnum) = ($6)::jsonb) AND \"i\".\"indpred\" IS NULL)) AS \"result\"",
+        "params": [
+          "\"public\".\"Payment_receiptNo_key\"",
+          "i",
+          "I",
+          "\"public\".\"Payment\"",
+          "btree",
+          "[\"receiptNo\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.Payment.Payment_receivedOn_idx",
+    "label": "Create index \"Payment_receivedOn_idx\" on \"Payment\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "Payment_receivedOn_idx",
+        "table": "Payment"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"Payment_receivedOn_idx\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Payment_receivedOn_idx\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "index \"Payment_receivedOn_idx\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"Payment_receivedOn_idx\"",
+        "sql": "CREATE INDEX \"Payment_receivedOn_idx\" ON \"public\".\"Payment\" (\"receivedOn\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"Payment_receivedOn_idx\" exists on \"Payment\" with the planned definition",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" INNER JOIN \"pg_index\" AS \"i\" ON \"i\".\"indexrelid\" = \"c\".\"oid\" INNER JOIN \"pg_am\" AS \"m\" ON \"m\".\"oid\" = \"c\".\"relam\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3) AND \"i\".\"indrelid\" = to_regclass($4) AND NOT (\"i\".\"indisunique\") AND \"m\".\"amname\" = $5 AND (\"i\".\"indexprs\" IS NULL AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"i\".\"indkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"i\".\"indrelid\" AND key_attribute.attnum = key_column.attnum) = ($6)::jsonb) AND \"i\".\"indpred\" IS NULL)) AS \"result\"",
+        "params": [
+          "\"public\".\"Payment_receivedOn_idx\"",
+          "i",
+          "I",
+          "\"public\".\"Payment\"",
+          "btree",
+          "[\"receivedOn\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.PaymentAllocation.PaymentAllocation_chargeId_idx",
+    "label": "Create index \"PaymentAllocation_chargeId_idx\" on \"PaymentAllocation\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "PaymentAllocation_chargeId_idx",
+        "table": "PaymentAllocation"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"PaymentAllocation_chargeId_idx\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"PaymentAllocation_chargeId_idx\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "index \"PaymentAllocation_chargeId_idx\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"PaymentAllocation_chargeId_idx\"",
+        "sql": "CREATE INDEX \"PaymentAllocation_chargeId_idx\" ON \"public\".\"PaymentAllocation\" (\"chargeId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"PaymentAllocation_chargeId_idx\" exists on \"PaymentAllocation\" with the planned definition",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" INNER JOIN \"pg_index\" AS \"i\" ON \"i\".\"indexrelid\" = \"c\".\"oid\" INNER JOIN \"pg_am\" AS \"m\" ON \"m\".\"oid\" = \"c\".\"relam\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3) AND \"i\".\"indrelid\" = to_regclass($4) AND NOT (\"i\".\"indisunique\") AND \"m\".\"amname\" = $5 AND (\"i\".\"indexprs\" IS NULL AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"i\".\"indkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"i\".\"indrelid\" AND key_attribute.attnum = key_column.attnum) = ($6)::jsonb) AND \"i\".\"indpred\" IS NULL)) AS \"result\"",
+        "params": [
+          "\"public\".\"PaymentAllocation_chargeId_idx\"",
+          "i",
+          "I",
+          "\"public\".\"PaymentAllocation\"",
+          "btree",
+          "[\"chargeId\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.User.User_email_key",
+    "label": "Create index \"User_email_key\" on \"User\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "User_email_key",
+        "table": "User"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"User_email_key\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"User_email_key\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "index \"User_email_key\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"User_email_key\"",
+        "sql": "CREATE UNIQUE INDEX \"User_email_key\" ON \"public\".\"User\" (\"email\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"User_email_key\" exists on \"User\" with the planned definition",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" INNER JOIN \"pg_index\" AS \"i\" ON \"i\".\"indexrelid\" = \"c\".\"oid\" INNER JOIN \"pg_am\" AS \"m\" ON \"m\".\"oid\" = \"c\".\"relam\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3) AND \"i\".\"indrelid\" = to_regclass($4) AND \"i\".\"indisunique\" AND \"m\".\"amname\" = $5 AND (\"i\".\"indexprs\" IS NULL AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"i\".\"indkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"i\".\"indrelid\" AND key_attribute.attnum = key_column.attnum) = ($6)::jsonb) AND \"i\".\"indpred\" IS NULL)) AS \"result\"",
+        "params": [
+          "\"public\".\"User_email_key\"",
+          "i",
+          "I",
+          "\"public\".\"User\"",
+          "btree",
+          "[\"email\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.Expense.Expense_categoryId_fkey",
+    "label": "Add foreign key \"Expense_categoryId_fkey\" on \"Expense\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "Expense_categoryId_fkey",
+        "table": "Expense"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"Expense_categoryId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Expense_categoryId_fkey",
+          "public",
+          "\"public\".\"Expense\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "FK \"Expense_categoryId_fkey\" on \"Expense\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"Expense_categoryId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"Expense\"\nADD CONSTRAINT \"Expense_categoryId_fkey\"\nFOREIGN KEY (\"categoryId\")\nREFERENCES \"public\".\"ExpenseCategory\" (\"id\")\nON DELETE RESTRICT\nON UPDATE CASCADE"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"Expense_categoryId_fkey\" exists with the planned columns, referenced table and actions",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3) AND \"c\".\"contype\" = $4 AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"conkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"conrelid\" AND key_attribute.attnum = key_column.attnum) = ($5)::jsonb AND \"c\".\"confrelid\" = to_regclass($6) AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"confkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"confrelid\" AND key_attribute.attnum = key_column.attnum) = ($7)::jsonb AND \"c\".\"confdeltype\" = $8 AND \"c\".\"confupdtype\" = $9)) AS \"result\"",
+        "params": [
+          "Expense_categoryId_fkey",
+          "public",
+          "\"public\".\"Expense\"",
+          "f",
+          "[\"categoryId\"]",
+          "\"public\".\"ExpenseCategory\"",
+          "[\"id\"]",
+          "r",
+          "c"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.FlatResident.FlatResident_flatId_fkey",
+    "label": "Add foreign key \"FlatResident_flatId_fkey\" on \"FlatResident\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "FlatResident_flatId_fkey",
+        "table": "FlatResident"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"FlatResident_flatId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "FlatResident_flatId_fkey",
+          "public",
+          "\"public\".\"FlatResident\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "FK \"FlatResident_flatId_fkey\" on \"FlatResident\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"FlatResident_flatId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"FlatResident\"\nADD CONSTRAINT \"FlatResident_flatId_fkey\"\nFOREIGN KEY (\"flatId\")\nREFERENCES \"public\".\"Flat\" (\"id\")\nON DELETE RESTRICT\nON UPDATE CASCADE"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"FlatResident_flatId_fkey\" exists with the planned columns, referenced table and actions",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3) AND \"c\".\"contype\" = $4 AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"conkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"conrelid\" AND key_attribute.attnum = key_column.attnum) = ($5)::jsonb AND \"c\".\"confrelid\" = to_regclass($6) AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"confkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"confrelid\" AND key_attribute.attnum = key_column.attnum) = ($7)::jsonb AND \"c\".\"confdeltype\" = $8 AND \"c\".\"confupdtype\" = $9)) AS \"result\"",
+        "params": [
+          "FlatResident_flatId_fkey",
+          "public",
+          "\"public\".\"FlatResident\"",
+          "f",
+          "[\"flatId\"]",
+          "\"public\".\"Flat\"",
+          "[\"id\"]",
+          "r",
+          "c"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.MaintenanceTask.MaintenanceTask_expenseId_fkey",
+    "label": "Add foreign key \"MaintenanceTask_expenseId_fkey\" on \"MaintenanceTask\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "MaintenanceTask_expenseId_fkey",
+        "table": "MaintenanceTask"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"MaintenanceTask_expenseId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "MaintenanceTask_expenseId_fkey",
+          "public",
+          "\"public\".\"MaintenanceTask\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "FK \"MaintenanceTask_expenseId_fkey\" on \"MaintenanceTask\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"MaintenanceTask_expenseId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"MaintenanceTask\"\nADD CONSTRAINT \"MaintenanceTask_expenseId_fkey\"\nFOREIGN KEY (\"expenseId\")\nREFERENCES \"public\".\"Expense\" (\"id\")\nON DELETE SET NULL\nON UPDATE CASCADE"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"MaintenanceTask_expenseId_fkey\" exists with the planned columns, referenced table and actions",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3) AND \"c\".\"contype\" = $4 AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"conkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"conrelid\" AND key_attribute.attnum = key_column.attnum) = ($5)::jsonb AND \"c\".\"confrelid\" = to_regclass($6) AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"confkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"confrelid\" AND key_attribute.attnum = key_column.attnum) = ($7)::jsonb AND \"c\".\"confdeltype\" = $8 AND \"c\".\"confupdtype\" = $9)) AS \"result\"",
+        "params": [
+          "MaintenanceTask_expenseId_fkey",
+          "public",
+          "\"public\".\"MaintenanceTask\"",
+          "f",
+          "[\"expenseId\"]",
+          "\"public\".\"Expense\"",
+          "[\"id\"]",
+          "n",
+          "c"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.MonthlyCharge.MonthlyCharge_flatId_fkey",
+    "label": "Add foreign key \"MonthlyCharge_flatId_fkey\" on \"MonthlyCharge\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "MonthlyCharge_flatId_fkey",
+        "table": "MonthlyCharge"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"MonthlyCharge_flatId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "MonthlyCharge_flatId_fkey",
+          "public",
+          "\"public\".\"MonthlyCharge\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "FK \"MonthlyCharge_flatId_fkey\" on \"MonthlyCharge\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"MonthlyCharge_flatId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"MonthlyCharge\"\nADD CONSTRAINT \"MonthlyCharge_flatId_fkey\"\nFOREIGN KEY (\"flatId\")\nREFERENCES \"public\".\"Flat\" (\"id\")\nON DELETE RESTRICT\nON UPDATE CASCADE"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"MonthlyCharge_flatId_fkey\" exists with the planned columns, referenced table and actions",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3) AND \"c\".\"contype\" = $4 AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"conkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"conrelid\" AND key_attribute.attnum = key_column.attnum) = ($5)::jsonb AND \"c\".\"confrelid\" = to_regclass($6) AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"confkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"confrelid\" AND key_attribute.attnum = key_column.attnum) = ($7)::jsonb AND \"c\".\"confdeltype\" = $8 AND \"c\".\"confupdtype\" = $9)) AS \"result\"",
+        "params": [
+          "MonthlyCharge_flatId_fkey",
+          "public",
+          "\"public\".\"MonthlyCharge\"",
+          "f",
+          "[\"flatId\"]",
+          "\"public\".\"Flat\"",
+          "[\"id\"]",
+          "r",
+          "c"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.Payment.Payment_flatId_fkey",
+    "label": "Add foreign key \"Payment_flatId_fkey\" on \"Payment\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "Payment_flatId_fkey",
+        "table": "Payment"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"Payment_flatId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Payment_flatId_fkey",
+          "public",
+          "\"public\".\"Payment\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "FK \"Payment_flatId_fkey\" on \"Payment\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"Payment_flatId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"Payment\"\nADD CONSTRAINT \"Payment_flatId_fkey\"\nFOREIGN KEY (\"flatId\")\nREFERENCES \"public\".\"Flat\" (\"id\")\nON DELETE RESTRICT\nON UPDATE CASCADE"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"Payment_flatId_fkey\" exists with the planned columns, referenced table and actions",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3) AND \"c\".\"contype\" = $4 AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"conkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"conrelid\" AND key_attribute.attnum = key_column.attnum) = ($5)::jsonb AND \"c\".\"confrelid\" = to_regclass($6) AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"confkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"confrelid\" AND key_attribute.attnum = key_column.attnum) = ($7)::jsonb AND \"c\".\"confdeltype\" = $8 AND \"c\".\"confupdtype\" = $9)) AS \"result\"",
+        "params": [
+          "Payment_flatId_fkey",
+          "public",
+          "\"public\".\"Payment\"",
+          "f",
+          "[\"flatId\"]",
+          "\"public\".\"Flat\"",
+          "[\"id\"]",
+          "r",
+          "c"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.PaymentAllocation.PaymentAllocation_paymentId_fkey",
+    "label": "Add foreign key \"PaymentAllocation_paymentId_fkey\" on \"PaymentAllocation\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "PaymentAllocation_paymentId_fkey",
+        "table": "PaymentAllocation"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"PaymentAllocation_paymentId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "PaymentAllocation_paymentId_fkey",
+          "public",
+          "\"public\".\"PaymentAllocation\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "FK \"PaymentAllocation_paymentId_fkey\" on \"PaymentAllocation\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"PaymentAllocation_paymentId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"PaymentAllocation\"\nADD CONSTRAINT \"PaymentAllocation_paymentId_fkey\"\nFOREIGN KEY (\"paymentId\")\nREFERENCES \"public\".\"Payment\" (\"id\")\nON DELETE RESTRICT\nON UPDATE CASCADE"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"PaymentAllocation_paymentId_fkey\" exists with the planned columns, referenced table and actions",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3) AND \"c\".\"contype\" = $4 AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"conkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"conrelid\" AND key_attribute.attnum = key_column.attnum) = ($5)::jsonb AND \"c\".\"confrelid\" = to_regclass($6) AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"confkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"confrelid\" AND key_attribute.attnum = key_column.attnum) = ($7)::jsonb AND \"c\".\"confdeltype\" = $8 AND \"c\".\"confupdtype\" = $9)) AS \"result\"",
+        "params": [
+          "PaymentAllocation_paymentId_fkey",
+          "public",
+          "\"public\".\"PaymentAllocation\"",
+          "f",
+          "[\"paymentId\"]",
+          "\"public\".\"Payment\"",
+          "[\"id\"]",
+          "r",
+          "c"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.PaymentAllocation.PaymentAllocation_chargeId_fkey",
+    "label": "Add foreign key \"PaymentAllocation_chargeId_fkey\" on \"PaymentAllocation\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "PaymentAllocation_chargeId_fkey",
+        "table": "PaymentAllocation"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"PaymentAllocation_chargeId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "PaymentAllocation_chargeId_fkey",
+          "public",
+          "\"public\".\"PaymentAllocation\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "FK \"PaymentAllocation_chargeId_fkey\" on \"PaymentAllocation\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"PaymentAllocation_chargeId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"PaymentAllocation\"\nADD CONSTRAINT \"PaymentAllocation_chargeId_fkey\"\nFOREIGN KEY (\"chargeId\")\nREFERENCES \"public\".\"MonthlyCharge\" (\"id\")\nON DELETE RESTRICT\nON UPDATE CASCADE"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"PaymentAllocation_chargeId_fkey\" exists with the planned columns, referenced table and actions",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3) AND \"c\".\"contype\" = $4 AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"conkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"conrelid\" AND key_attribute.attnum = key_column.attnum) = ($5)::jsonb AND \"c\".\"confrelid\" = to_regclass($6) AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"confkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"confrelid\" AND key_attribute.attnum = key_column.attnum) = ($7)::jsonb AND \"c\".\"confdeltype\" = $8 AND \"c\".\"confupdtype\" = $9)) AS \"result\"",
+        "params": [
+          "PaymentAllocation_chargeId_fkey",
+          "public",
+          "\"public\".\"PaymentAllocation\"",
+          "f",
+          "[\"chargeId\"]",
+          "\"public\".\"MonthlyCharge\"",
+          "[\"id\"]",
+          "r",
+          "c"
+        ]
+      }
+    ]
+  }
+]

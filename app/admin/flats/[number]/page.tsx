@@ -1,12 +1,15 @@
 import { notFound } from "next/navigation";
-import { prisma } from "@/lib/db";
+import { db } from "@/lib/db";
 import { taka } from "@/lib/dates";
 import { saveFlat, addResident, toggleResident } from "@/lib/actions";
 import { Msg } from "@/components/Msg";
 
 export default async function FlatPage({ params, searchParams }: { params: Promise<{ number: string }>; searchParams: Promise<{ err?: string; ok?: string }> }) {
   const { number } = await params; const sp = await searchParams;
-  const f = await prisma.flat.findUnique({ where: { number }, include: { residents: true, charges: { orderBy: { month: "desc" }, include: { allocations: { where: { payment: { voidedAt: null } } } } } } });
+  const f = await db().orm.public.Flat
+    .include("residents")
+    .include("charges", (c) => c.orderBy((ch) => ch.month.desc()).include("allocations", (al) => al.where((x) => x.payment.some((p) => p.voidedAt.isNull()))))
+    .first({ number });
   if (!f) notFound();
   return (
     <>
@@ -17,7 +20,7 @@ export default async function FlatPage({ params, searchParams }: { params: Promi
         <label>Tenant<input name="tenantName" defaultValue={f.tenantName ?? ""} /></label>
         <label>Phone<input name="phone" defaultValue={f.phone ?? ""} /></label>
         <label>Status<select name="occupancy" defaultValue={f.occupancy}><option value="OCCUPIED">Occupied</option><option value="VACANT">Vacant</option></select></label>
-        <label>Custom monthly charge (blank = default)<input name="customCharge" inputMode="decimal" defaultValue={f.customCharge?.toString() ?? ""} /></label>
+        <label>Custom monthly charge (blank = default)<input name="customCharge" inputMode="decimal" defaultValue={f.customCharge ?? ""} /></label>
         <button>Save flat</button>
       </form>
       <h2>Approved resident accounts</h2>

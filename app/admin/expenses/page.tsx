@@ -1,4 +1,4 @@
-import { prisma } from "@/lib/db";
+import { db } from "@/lib/db";
 import { taka } from "@/lib/dates";
 import { addExpense, payExpense, voidExpense } from "@/lib/actions";
 import { Msg } from "@/components/Msg";
@@ -6,7 +6,8 @@ import { Msg } from "@/components/Msg";
 const METHODS = [["CASH", "Cash"], ["BANK_TRANSFER", "Bank transfer"], ["MOBILE_FINANCIAL_SERVICE", "Mobile financial service"], ["OTHER", "Other"]];
 export default async function Expenses({ searchParams }: { searchParams: Promise<{ err?: string; ok?: string }> }) {
   const sp = await searchParams; const today = new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Dhaka" });
-  const [cats, list] = await Promise.all([prisma.expenseCategory.findMany({ where: { active: true }, orderBy: { name: "asc" } }), prisma.expense.findMany({ orderBy: { expenseDate: "desc" }, take: 80, include: { category: true } })]);
+  const d = db();
+  const [cats, list] = await Promise.all([d.orm.public.ExpenseCategory.where({ active: true }).orderBy((c) => c.name.asc()).all(), d.orm.public.Expense.orderBy((e) => e.expenseDate.desc()).limit(80).include("category").all()]);
   const opts = METHODS.map(([v, l]) => <option key={v} value={v}>{l}</option>);
   return (
     <>
@@ -23,7 +24,7 @@ export default async function Expenses({ searchParams }: { searchParams: Promise
       </form>
       <div className="card tw"><table><thead><tr><th>Date</th><th>Title</th><th>Category</th><th className="n">Amount</th><th>Status</th><th></th></tr></thead>
         <tbody>{list.map(e => (
-          <tr key={e.id} className={e.status === "VOID" ? "void" : ""}><td>{e.expenseDate.toISOString().slice(0, 10)}</td><td>{e.title}</td><td>{e.category.name}</td><td className="n">{taka(e.amount.toString())}</td><td>{e.status === "PAID" ? "Paid" : e.status === "VOID" ? "Void" : "Unpaid"}</td>
+          <tr key={e.id} className={e.status === "VOID" ? "void" : ""}><td>{e.expenseDate}</td><td>{e.title}</td><td>{e.category.name}</td><td className="n">{taka(e.amount)}</td><td>{e.status === "PAID" ? "Paid" : e.status === "VOID" ? "Void" : "Unpaid"}</td>
             <td>{e.status === "RECORDED" && <form action={payExpense} className="inline"><input type="hidden" name="id" value={e.id} /><input name="date" type="date" defaultValue={today} /><select name="method">{opts}</select><button className="sec">Mark paid</button></form>}
               {e.status !== "VOID" && <form action={voidExpense} className="inline"><input type="hidden" name="id" value={e.id} /><input name="reason" placeholder="Reason to void" required /><button className="sec">Void</button></form>}</td></tr>))}</tbody></table></div>
     </>
