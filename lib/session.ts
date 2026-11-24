@@ -7,7 +7,7 @@ export type Session =
   | { kind: "resident"; flatIds: string[]; email: string };
 
 // Single source of truth for "who is this?". Always checks the approved-email lists in our own
-// database, so a valid Google login alone never grants access.
+// database, so a valid Supabase account alone never grants access.
 export async function getSession(): Promise<Session | null> {
   const { data } = await (await supabaseServer()).auth.getUser();
   const u = data.user;

@@ -20,8 +20,9 @@ export default async function FlatPage({ params, searchParams }: { params: Promi
         <label>Custom monthly charge (blank = default)<input name="customCharge" inputMode="decimal" defaultValue={f.customCharge?.toString() ?? ""} /></label>
         <button>Save flat</button>
       </form>
-      <h2>Approved Google accounts</h2>
+      <h2>Approved resident accounts</h2>
       <div className="card">
+        <p>After adding a resident here, create a confirmed Supabase Auth user with the same email so they can sign in.</p>
         {f.residents.map(r => (
           <form key={r.id} action={toggleResident} className="inline" style={{ display: "flex", gap: 8, marginBottom: 6 }}>
             <input type="hidden" name="number" value={f.number} /><input type="hidden" name="id" value={r.id} />
@@ -30,7 +31,7 @@ export default async function FlatPage({ params, searchParams }: { params: Promi
           </form>))}
         {!f.residents.length && <p>No resident can sign in to this flat yet.</p>}
         <form className="grid" action={addResident}><input type="hidden" name="number" value={f.number} />
-          <label>Google email<input name="email" type="email" required /></label><label>Name<input name="name" /></label><button>Add resident</button></form>
+          <label>Email<input name="email" type="email" required /></label><label>Name<input name="name" /></label><button>Add resident</button></form>
       </div>
       <h2>Ledger</h2>
       <div className="card tw"><table><thead><tr><th>Month</th><th className="n">Charge</th><th className="n">Paid</th><th className="n">Due</th></tr></thead>

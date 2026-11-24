@@ -26,7 +26,8 @@ export default async function Settings({ searchParams }: { searchParams: Promise
         <form className="grid card" action={closeMonth}><label>Month to close<input name="month" placeholder="2026-10" required /></label><button>Close month</button></form>
         {closed.map(c => <form key={c.month} action={reopenMonth} className="inline card"><b>{c.month} closed</b><input type="hidden" name="month" value={c.month} /><input name="reason" placeholder="Reason to reopen" required /><button className="sec">Reopen</button></form>)}
         <h2>Managers</h2>
-        <form className="grid card" action={addManager}><label>Google email<input name="email" type="email" required /></label><label>Name<input name="name" /></label><button>Add manager</button></form>
+        <p>Create a confirmed Supabase Auth user with the same email after adding a manager here.</p>
+        <form className="grid card" action={addManager}><label>Email<input name="email" type="email" required /></label><label>Name<input name="name" /></label><button>Add manager</button></form>
         {managers.map(m => <form key={m.id} action={toggleManager} className="inline card"><input type="hidden" name="id" value={m.id} /><span className={m.active ? "" : "void"}>{m.email}</span><button className="sec">{m.active ? "Deactivate" : "Activate"}</button></form>)}
       </>}
     </>

@@ -9,7 +9,7 @@ export async function GET(req: Request) {
   if (code) await sb.auth.exchangeCodeForSession(code);
   const s = await getSession();
   if (!s) {
-    await sb.auth.signOut(); // Google account is valid but not approved: reject.
+    await sb.auth.signOut(); // Valid Supabase account but not approved: reject.
     return NextResponse.redirect(new URL("/login?error=unauthorized", url.origin));
   }
   return NextResponse.redirect(new URL(s.kind === "staff" ? "/admin" : "/resident", url.origin));
