@@ -51,7 +51,8 @@ following "First run" below.
    - Authentication > Users > Add user. Create a confirmed user with the same email as `SUPER_ADMIN_EMAIL`
      and set a password. Do not put that password in `.env` or source control.
    - Authentication > URL Configuration: Site URL `http://127.0.0.1:3000`; allow
-     `http://127.0.0.1:3000/auth/callback` (and your Vercel callback later).
+     `http://127.0.0.1:3000/**` (and your Vercel URL later). Use "Forgot or need to set your password?" on the login
+     page to receive a secure reset link.
 9. `npm run dev`, open http://127.0.0.1:3000/login, and sign in with the Super Admin email and password.
 10. Settings > "Generate monthly bills" for each month you want billed. Then Flats > open a flat > add the resident's email.
     Create a confirmed Supabase Auth user with the same email so the resident can sign in.
