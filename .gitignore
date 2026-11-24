@@ -1,0 +1,10 @@
+node_modules
+.next
+shymol-chaya-app.zip
+.env
+.env.local
+.env
+.env.*
+!.env.example
+node_modules
+.next

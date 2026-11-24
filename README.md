@@ -27,6 +27,11 @@ reports pages, search/filters, automated tests beyond `tests/allocate.test.ts`. 
 ## Requirements
 Node.js 20+, VS Code (install the recommended extensions when prompted), a free Supabase account, a Google Cloud account.
 
+## Local visual preview
+Run `npm run dev` and open `http://127.0.0.1:3000/preview` to browse a read-only demo with fictional sample data.
+Demo actions are disabled and do not connect to Supabase. The preview route is unavailable in production. The home
+page and `/login` use real authentication; configure the database and Google sign-in by following "First run" below.
+
 ## First run (local, VS Code)
 1. Unzip, then `File > Open Folder` in VS Code. Open a terminal.
 2. `npm install`
