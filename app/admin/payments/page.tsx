@@ -1,14 +1,15 @@
 import Link from "next/link";
-import { prisma } from "@/lib/db";
+import { db } from "@/lib/db";
 import { taka } from "@/lib/dates";
 import { addPayment, voidPay } from "@/lib/actions";
 import { Msg } from "@/components/Msg";
 
 export default async function Payments({ searchParams }: { searchParams: Promise<{ err?: string; ok?: string }> }) {
   const sp = await searchParams;
+  const d = db();
   const [flats, pays] = await Promise.all([
-    prisma.flat.findMany({ where: { occupancy: "OCCUPIED" }, orderBy: [{ floor: "asc" }, { number: "asc" }] }),
-    prisma.payment.findMany({ orderBy: { createdAt: "desc" }, take: 60, include: { flat: true } }),
+    d.orm.public.Flat.where({ occupancy: "OCCUPIED" }).orderBy((f) => f.floor.asc()).orderBy((f) => f.number.asc()).all(),
+    d.orm.public.Payment.orderBy((p) => p.createdAt.desc()).limit(60).include("flat").all(),
   ]);
   return (
     <>
@@ -24,7 +25,7 @@ export default async function Payments({ searchParams }: { searchParams: Promise
       <p className="noprint">Payments clear the oldest unpaid month first. <a href="/admin/export/payments">Download CSV</a></p>
       <div className="card tw"><table><thead><tr><th>Receipt</th><th>Flat</th><th>Date</th><th className="n">Amount</th><th>Status</th><th></th></tr></thead>
         <tbody>{pays.map(p => (
-          <tr key={p.id} className={p.voidedAt ? "void" : ""}><td><Link href={`/admin/receipt/${p.id}`}>{p.receiptNo}</Link></td><td>{p.flat.number}</td><td>{p.receivedOn.toISOString().slice(0, 10)}</td><td className="n">{taka(p.amount.toString())}</td>
+          <tr key={p.id} className={p.voidedAt ? "void" : ""}><td><Link href={`/admin/receipt/${p.id}`}>{p.receiptNo}</Link></td><td>{p.flat.number}</td><td>{p.receivedOn}</td><td className="n">{taka(p.amount)}</td>
             <td>{p.voidedAt ? "Void" : "Received"}</td>
             <td>{!p.voidedAt && <form action={voidPay} className="inline"><input type="hidden" name="id" value={p.id} /><input name="reason" placeholder="Reason to void" required /><button className="sec">Void</button></form>}</td></tr>))}</tbody></table></div>
     </>

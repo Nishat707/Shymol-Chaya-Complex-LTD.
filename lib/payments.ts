@@ -1,37 +1,48 @@
-import { Prisma, PayMethod } from "@prisma/client";
-import { prisma } from "./db";
+import { Decimal } from "decimal.js";
+import { db } from "./db";
 import { allocate } from "./allocate";
 import { monthOf } from "./dates";
 
+export type PayMethod = "CASH" | "BANK_TRANSFER" | "MOBILE_FINANCIAL_SERVICE" | "OTHER";
+export const PAY_METHODS: PayMethod[] = ["CASH", "BANK_TRANSFER", "MOBILE_FINANCIAL_SERVICE", "OTHER"];
+
 export async function recordPayment(i: { flatNumber: string; amount: string; receivedOn: Date; method: PayMethod; reference?: string; notes?: string; actorId: string }) {
-  return prisma.$transaction(async tx => {
+  const receivedOn = i.receivedOn.toISOString().slice(0, 10);
+  return db().transaction(async tx => {
     const month = monthOf(i.receivedOn);
-    if (await tx.monthClose.findUnique({ where: { month } })) throw new Error(`${month} is closed. Ask the Super Admin to reopen it.`);
-    const flat = await tx.flat.findUniqueOrThrow({ where: { number: i.flatNumber } });
-    const charges = await tx.monthlyCharge.findMany({ where: { flatId: flat.id }, include: { allocations: { where: { payment: { voidedAt: null } } } } });
+    if (await tx.orm.public.MonthClose.first({ month })) throw new Error(`${month} is closed. Ask the Super Admin to reopen it.`);
+    const flat = await tx.orm.public.Flat.firstOrThrow({ number: i.flatNumber });
+    const charges = await tx.orm.public.MonthlyCharge
+      .where({ flatId: flat.id })
+      .include("allocations", (al) => al.where((x) => x.payment.some((p) => p.voidedAt.isNull())))
+      .all();
     const dues = charges.map(c => ({
       chargeId: c.id, month: c.month,
-      due: c.allocations.reduce((a, x) => a.minus(x.amount), c.amount.minus(c.waived)),
+      due: new Decimal(c.amount).minus(c.waived).minus(c.allocations.reduce((a, x) => a.plus(x.amount), new Decimal(0))),
     }));
     const allocs = allocate(i.amount, dues);
-    const n = await tx.counter.upsert({ where: { key: "receipt" }, create: { key: "receipt", value: 1 }, update: { value: { increment: 1 } } });
-    const receiptNo = `RC-${month.slice(0, 4)}-${String(n.value).padStart(5, "0")}`;
-    const p = await tx.payment.create({
-      data: { receiptNo, flatId: flat.id, amount: i.amount, receivedOn: i.receivedOn, method: i.method, reference: i.reference, notes: i.notes, createdById: i.actorId,
-        allocations: { create: allocs } },
+    const counter = await tx.orm.public.Counter.where({ key: "receipt" }).forUpdate().first();
+    const value = (counter?.value ?? 0) + 1;
+    if (counter) await tx.orm.public.Counter.where({ key: "receipt" }).update({ value });
+    else await tx.orm.public.Counter.create({ key: "receipt", value });
+    const receiptNo = `RC-${month.slice(0, 4)}-${String(value).padStart(5, "0")}`;
+    const p = await tx.orm.public.Payment.create({
+      receiptNo, flatId: flat.id, amount: i.amount, receivedOn, method: i.method, reference: i.reference, notes: i.notes, createdById: i.actorId,
     });
-    await tx.auditLog.create({ data: { actorId: i.actorId, action: "RECORD_PAYMENT", entity: "Payment", entityId: p.id, after: { receiptNo, flat: i.flatNumber, amount: i.amount } } });
+    await tx.orm.public.PaymentAllocation.createAll(allocs.map(a => ({ paymentId: p.id, chargeId: a.chargeId, amount: a.amount.toString() })));
+    await tx.orm.public.AuditLog.create({ actorId: i.actorId, action: "RECORD_PAYMENT", entity: "Payment", entityId: p.id, after: { receiptNo, flat: i.flatNumber, amount: i.amount } });
     return p;
-  }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
+  }, { isolationLevel: "Serializable" });
 }
 
 export async function voidPayment(paymentId: string, reason: string, actorId: string) {
   if (!reason.trim()) throw new Error("A reason is required.");
-  return prisma.$transaction(async tx => {
-    const p = await tx.payment.findUniqueOrThrow({ where: { id: paymentId } });
+  return db().transaction(async tx => {
+    const p = await tx.orm.public.Payment.firstOrThrow({ id: paymentId });
     if (p.voidedAt) throw new Error("Already voided.");
-    if (await tx.monthClose.findUnique({ where: { month: monthOf(p.receivedOn) } })) throw new Error("That month is closed.");
-    await tx.payment.update({ where: { id: paymentId }, data: { voidedAt: new Date(), voidReason: reason } });
-    await tx.auditLog.create({ data: { actorId, action: "VOID_PAYMENT", entity: "Payment", entityId: paymentId, before: { receiptNo: p.receiptNo, amount: p.amount.toString() }, reason } });
+    const month = p.receivedOn.slice(0, 7); // Date columns read as "YYYY-MM-DD".
+    if (await tx.orm.public.MonthClose.first({ month })) throw new Error("That month is closed.");
+    await tx.orm.public.Payment.where({ id: paymentId }).update({ voidedAt: new Date(), voidReason: reason });
+    await tx.orm.public.AuditLog.create({ actorId, action: "VOID_PAYMENT", entity: "Payment", entityId: paymentId, before: { receiptNo: p.receiptNo, amount: p.amount }, reason });
   });
 }

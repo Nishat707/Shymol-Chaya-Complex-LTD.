@@ -21,6 +21,9 @@
     "paths": {
       "@/*": [
         "./*"
+      ],
+      "@prisma/client": [
+        "./compat/prisma-client.ts"
       ]
     },
     "allowJs": true,

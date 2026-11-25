@@ -1,6 +1,6 @@
-import { prisma } from "@/lib/db";
+import { db } from "@/lib/db";
 export default async function Audit() {
-  const rows = await prisma.auditLog.findMany({ orderBy: { at: "desc" }, take: 200 });
+  const rows = await db().orm.public.AuditLog.orderBy((r) => r.at.desc()).limit(200).all();
   return (
     <>
       <h1>Audit log</h1>

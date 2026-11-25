@@ -3,27 +3,40 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "prisma generate && next build",
+    "build": "next build",
     "start": "next start",
-    "db:migrate": "prisma migrate dev",
-    "db:deploy": "prisma migrate deploy",
+    "db:migrate": "prisma db migrate",
     "db:seed": "tsx prisma/seed.ts",
     "test": "vitest run"
   },
   "dependencies": {
-    "@prisma/client": "^6.0.0",
+    "@prisma/composer": "0.40.0",
+    "@prisma/composer-prisma-cloud": "0.40.0",
+    "@prisma/orm-postgres": "8.0.0-rc.25",
     "@supabase/ssr": "^0.5.0",
     "@supabase/supabase-js": "^2.45.0",
+    "arktype": "^2.2.9",
+    "decimal.js": "^10.6.0",
+    "effect": "4.1.4",
     "next": "^15.0.0",
+    "pg": "^8.22.0",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "temporal-polyfill": "^1.0.8"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
+    "@types/pg": "^8.20.0",
     "@types/react": "^19.0.0",
-    "prisma": "^6.0.0",
+    "prisma": "8.0.0-rc.35",
     "tsx": "^4.19.0",
     "typescript": "^5.6.0",
     "vitest": "^2.1.0"
+  },
+  "overrides": {
+    "effect": "4.1.4",
+    "@effect/platform-bun": "4.1.4",
+    "@effect/platform-node": "4.1.4",
+    "@effect/platform-node-shared": "4.1.4"
   }
 }
