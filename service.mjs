@@ -12,6 +12,7 @@ export default compute({
   input: type({
     supabaseUrl: field(type("string")),
     supabaseAnonKey: secretString(),
+    siteUrl: field(type("string")),
   }),
   build: nextjs({ module: import.meta.url, appDir: "." }),
 });

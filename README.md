@@ -61,6 +61,7 @@ following "First run" below.
 1. Create a **private** GitHub repo and push this folder (`.env` is git-ignored).
 2. Vercel > Add New Project > import the repo. Choose a region near Supabase (Tokyo for the current project). Add the same variables as `.env`,
    with `NEXT_PUBLIC_SITE_URL` set to your Vercel URL.
+   For Prisma Cloud, set `NEXT_PUBLIC_SITE_URL` to the app's public production URL; the auth callback uses it for redirects.
 3. Add the Vercel URL under Supabase > Authentication > URL Configuration.
 4. Run once against production: `npm run db:deploy` (with production `DATABASE_URL`/`DIRECT_URL`), then the constraints SQL and the seed.
 5. Add a second Super Admin account so you cannot be locked out.
