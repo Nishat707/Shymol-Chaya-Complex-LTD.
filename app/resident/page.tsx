@@ -1,43 +1,77 @@
-import { or } from "@prisma/orm-postgres/orm-client";
 import { db } from "@/lib/db";
-import { requireResident } from "@/lib/session";
+import { summary } from "@/lib/finance";
 import { taka } from "@/lib/dates";
+import { requireResident } from "@/lib/session";
 
 export default async function Resident() {
-  const s = await requireResident();
+  await requireResident();
   const d = db();
-  // Scoped by the session's flat ids. Residents can never query another flat.
-  const flats = await d.orm.public.Flat
-    .where((f) => f.id.in(s.flatIds))
-    .include("charges", (c) => c.orderBy((ch) => ch.month.desc()).include("allocations", (al) => al.where((x) => x.payment.some((p) => p.voidedAt.isNull()))))
-    .all();
-  const notices = await d.orm.public.Notice
-    .where((n) => or(n.expiresAt.isNull(), n.expiresAt.gt(new Date())))
-    .orderBy((n) => n.publishedAt.desc())
-    .limit(5)
-    .all();
+  const [totals, flats, expenses] = await Promise.all([
+    summary(),
+    d.orm.public.Flat
+      .orderBy((f) => f.floor.asc()).orderBy((f) => f.number.asc())
+      .include("charges", (c) => c.include("allocations", (al) => al.where((x) => x.payment.some((p) => p.voidedAt.isNull()))))
+      .all(),
+    d.orm.public.Expense
+      .where({ status: "PAID" })
+      .orderBy((e) => e.expenseDate.desc())
+      .limit(80)
+      .include("category")
+      .all(),
+  ]);
+  const dues = flats.map((flat) => ({
+    flat,
+    due: flat.charges.reduce((sum, charge) =>
+      sum + Number(charge.amount) - Number(charge.waived) -
+        charge.allocations.reduce((paid, allocation) => paid + Number(allocation.amount), 0), 0),
+  }));
+  const cards: [string, number][] = [
+    ["Total outstanding dues", totals.outstanding],
+    ["Current balance", totals.balance],
+    ["Expenses paid", totals.expensesPaid],
+  ];
+
   return (
     <>
-      <h1>Welcome to Shymol Chaya Complex LTD.</h1>
-      {flats.map(f => {
-        const rows = f.charges.map(c => {
-          const net = Number(c.amount) - Number(c.waived), paid = c.allocations.reduce((a, x) => a + Number(x.amount), 0);
-          return { m: c.month, net, paid, due: net - paid };
-        });
-        return (
-          <section key={f.id}>
-            <h2>Flat {f.number} · Outstanding {taka(rows.reduce((a, r) => a + r.due, 0))}</h2>
-            <table style={{ width: "100%", borderCollapse: "collapse" }}>
-              <thead><tr><th align="left">Month</th><th align="right">Charge</th><th align="right">Paid</th><th align="right">Due</th><th align="left">Status</th></tr></thead>
-              <tbody>{rows.map(r => (
-                <tr key={r.m}><td>{r.m}</td><td align="right">{taka(r.net)}</td><td align="right">{taka(r.paid)}</td><td align="right">{taka(r.due)}</td><td>{r.due <= 0 ? "Paid" : r.paid > 0 ? "Partial" : "Unpaid"}</td></tr>
-              ))}</tbody>
-            </table>
-          </section>
-        );
-      })}
-      <h2>Announcements</h2>
-      {notices.length ? notices.map(n => <p key={n.id}><b>{n.title}</b><br />{n.body}</p>) : <p>No announcements right now.</p>}
+      <h1>Community Dashboard</h1>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(170px,1fr))", gap: 12 }}>
+        {cards.map(([label, amount]) => (
+          <div className="card" key={label}>
+            <div style={{ color: "#66736c", fontSize: 13 }}>{label}</div>
+            <div style={{ fontSize: 22, fontWeight: 700 }}>{taka(amount)}</div>
+          </div>
+        ))}
+      </div>
+
+      <section className="card tw">
+        <h2>Outstanding dues by flat</h2>
+        <table>
+          <thead><tr><th>Flat</th><th>Owner</th><th className="n">Due</th></tr></thead>
+          <tbody>{dues.map(({ flat, due }) => (
+            <tr key={flat.id}>
+              <td>{flat.number}</td>
+              <td>{flat.ownerName ?? "Owner not set"}</td>
+              <td className="n">{taka(due)}</td>
+            </tr>
+          ))}</tbody>
+        </table>
+      </section>
+
+      <section className="card tw">
+        <h2>Recent paid expenses</h2>
+        <table>
+          <thead><tr><th>Date</th><th>Expense</th><th>Category</th><th className="n">Amount</th></tr></thead>
+          <tbody>{expenses.length ? expenses.map((expense) => (
+            <tr key={expense.id}>
+              <td>{expense.expenseDate}</td>
+              <td>{expense.title}</td>
+              <td>{expense.category.name}</td>
+              <td className="n">{taka(expense.amount)}</td>
+            </tr>
+          )) : <tr><td colSpan={4}>No paid expenses recorded.</td></tr>}</tbody>
+        </table>
+        <p>Showing up to the latest 80 paid expenses.</p>
+      </section>
     </>
   );
 }

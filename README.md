@@ -10,7 +10,7 @@ Next.js (App Router, TypeScript) · Prisma · PostgreSQL and email/password auth
 | Area | Details |
 |---|---|
 | Flats | 50 flats seeded (2A–2B, 3A–10F). Edit owner/tenant/phone/occupancy/custom charge. Ledger per flat. |
-| Residents | Admin registers each resident email against a flat. Unregistered accounts are rejected. Residents see only their own flat, read-only. |
+| Residents | Admin registers each resident email against a flat. Unregistered accounts are rejected. Residents see a read-only community dashboard with building-wide balance/dues, per-flat owner dues, and recent paid expenses; staff-only pages remain restricted. |
 | Billing | Default charge with effective-date history, per-flat overrides, idempotent monthly generation; billed amounts are snapshots and never change. |
 | Payments | Oldest-month-first allocation, partial and multi-month, overpayment rejected, unique receipt numbers, printable receipt, void with reason, CSV export. |
 | Expenses | 12 seeded categories; "recorded" vs "paid" are separate; void with reason. |
