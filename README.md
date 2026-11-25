@@ -57,14 +57,18 @@ following "First run" below.
 10. Settings > "Generate monthly bills" for each month you want billed. Then Flats > open a flat > add the resident's email.
     Create a confirmed Supabase Auth user with the same email so the resident can sign in.
 
-## Deploy (GitHub + Vercel)
-1. Create a **private** GitHub repo and push this folder (`.env` is git-ignored).
-2. Vercel > Add New Project > import the repo. Choose a region near Supabase (Tokyo for the current project). Add the same variables as `.env`,
-   with `NEXT_PUBLIC_SITE_URL` set to your Vercel URL.
-   For Prisma Cloud, set `NEXT_PUBLIC_SITE_URL` to the app's public production URL; the auth callback uses it for redirects.
-3. Add the Vercel URL under Supabase > Authentication > URL Configuration.
-4. Run once against production: `npm run db:deploy` (with production `DATABASE_URL`/`DIRECT_URL`), then the constraints SQL and the seed.
-5. Add a second Super Admin account so you cannot be locked out.
+## Deploy to Vercel using the existing Prisma Postgres database
+1. Import the private GitHub repository into Vercel and select Next.js.
+2. Set these Vercel environment variables:
+   - `DATABASE_URL` = a dedicated production connection URL for the existing Prisma Postgres database (not the Supabase database URL).
+   - `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` = the existing Supabase Auth project values.
+   - `NEXT_PUBLIC_SITE_URL` = the canonical public URL, such as `https://your-domain.com`.
+3. Add the domain in Vercel, then set `NEXT_PUBLIC_SITE_URL` to that exact origin and redeploy.
+4. In Supabase > Authentication > URL Configuration, set the Site URL and allow the Vercel production domain as a redirect URL.
+
+The Vercel app and Prisma Cloud app use the same Prisma Postgres database. Do not run migrations or the full seed as part of this deployment: production already contains its schema, Super Admin, and 50 flats. Keep the database URL in Vercel's encrypted environment settings; never commit it or paste it into chat.
+
+The existing Prisma Cloud deployment continues using its Composer-provided database client and configuration.
 
 ## Project layout
 - `prisma/schema.prisma` data model · `prisma/constraints.sql` DB rules · `prisma/seed.ts` initial data

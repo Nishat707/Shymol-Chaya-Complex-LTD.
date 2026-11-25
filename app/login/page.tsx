@@ -1,10 +1,10 @@
 import { Suspense } from "react";
-import service from "../../service.mjs";
+import { getAppConfig } from "@/lib/app-config";
 import LoginForm from "./LoginForm";
 
 export const dynamic = "force-dynamic";
 
 export default function Page() {
-  const input = service.input();
-  return <Suspense><LoginForm supabaseUrl={input.supabaseUrl} supabaseAnonKey={input.supabaseAnonKey.expose()} /></Suspense>;
+  const config = getAppConfig();
+  return <Suspense><LoginForm supabaseUrl={config.supabaseUrl} supabaseAnonKey={config.supabaseAnonKey} /></Suspense>;
 }

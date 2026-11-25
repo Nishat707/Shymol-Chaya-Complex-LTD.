@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabase/server";
 import { getSession } from "@/lib/session";
-import service from "../../../service.mjs";
+import { getAppConfig } from "@/lib/app-config";
 
 export async function GET(req: Request) {
   const url = new URL(req.url);
-  const siteUrl = new URL(service.input().siteUrl);
+  const siteUrl = new URL(getAppConfig().siteUrl);
   if (siteUrl.protocol !== "http:" && siteUrl.protocol !== "https:") {
     throw new Error("NEXT_PUBLIC_SITE_URL must use HTTP or HTTPS");
   }

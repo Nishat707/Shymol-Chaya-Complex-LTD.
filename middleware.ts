@@ -1,6 +1,6 @@
 import { createServerClient, type SetAllCookies } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
-import service from "./service.mjs";
+import { getAppConfig } from "./lib/app-config";
 
 // Keeps the Supabase session cookie fresh. Authorization itself happens in lib/session.ts.
 export async function middleware(req: NextRequest) {
@@ -9,8 +9,8 @@ export async function middleware(req: NextRequest) {
   // service's stashed input, and one failed refresh must not 5xx the request:
   // authorization never depends on it (lib/session.ts re-checks every request).
   try {
-    const input = service.input();
-    const sb = createServerClient(input.supabaseUrl, input.supabaseAnonKey.expose(), {
+    const config = getAppConfig();
+    const sb = createServerClient(config.supabaseUrl, config.supabaseAnonKey, {
       cookies: {
         getAll: () => req.cookies.getAll(),
         setAll: (list: Parameters<SetAllCookies>[0]) => { list.forEach(c => req.cookies.set(c.name, c.value)); res = NextResponse.next({ request: req }); list.forEach(c => res.cookies.set(c.name, c.value, c.options)); },
