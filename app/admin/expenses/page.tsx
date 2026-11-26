@@ -1,7 +1,8 @@
 import { db } from "@/lib/db";
 import { taka } from "@/lib/dates";
-import { addExpense, addExpenseCategory, payExpense, toggleExpenseCategory, voidExpense } from "@/lib/actions";
+import { addExpense, addExpenseCategory, payExpense, setupDefaultExpenseCategories, toggleExpenseCategory, voidExpense } from "@/lib/actions";
 import { Msg } from "@/components/Msg";
+import { DEFAULT_EXPENSE_CATEGORIES } from "@/lib/expense-categories";
 
 const METHODS = [["CASH", "Cash"], ["BANK_TRANSFER", "Bank transfer"], ["MOBILE_FINANCIAL_SERVICE", "Mobile financial service"], ["OTHER", "Other"]];
 export default async function Expenses({ searchParams }: { searchParams: Promise<{ err?: string; ok?: string }> }) {
@@ -12,29 +13,36 @@ export default async function Expenses({ searchParams }: { searchParams: Promise
     d.orm.public.ExpenseCategory.orderBy((c) => c.name.asc()).all(),
     d.orm.public.Expense.orderBy((e) => e.expenseDate.desc()).limit(80).include("category").all(),
   ]);
+  const activeNames = new Set(cats.map((category) => category.name.toLowerCase()));
+  const needsDefaults = DEFAULT_EXPENSE_CATEGORIES.some((name) => !activeNames.has(name.toLowerCase()));
   const opts = METHODS.map(([v, l]) => <option key={v} value={v}>{l}</option>);
   return (
     <>
       <h1>Expenses</h1><Msg sp={sp} />
       <form className="grid card" action={addExpense}>
         <label>Title<input name="title" required /></label>
-        <label>Category<select name="category" required defaultValue=""><option value="" disabled>Select a category</option>{cats.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}</select></label>
+        <label>Category<select name="category" required defaultValue="" disabled={!cats.length}><option value="" disabled>Select a category</option>{cats.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}</select>
+          {!cats.length && <span className="field-help">Set up categories below before adding an expense.</span>}
+        </label>
         <label>Amount (৳)<input name="amount" inputMode="decimal" required /></label>
         <label>Date<input name="date" type="date" defaultValue={today} required /></label>
         <label>Vendor<input name="vendor" /></label><label>Description<input name="description" /></label>
         <label>Status<select name="paid"><option value="0">Recorded, not paid yet</option><option value="1">Paid</option></select></label>
         <label>Method (if paid)<select name="method">{opts}</select></label>
-        <button>Add expense</button>
+        <button disabled={!cats.length}>Add expense</button>
       </form>
       <section className="card category-panel">
         <div className="section-heading">
           <div><h2>Expense categories</h2><p>Add categories or deactivate ones you no longer use.</p></div>
           <span className="category-count">{cats.length} active</span>
         </div>
-        <form className="category-form" action={addExpenseCategory}>
-          <label>New category<input name="name" maxLength={60} placeholder="e.g. Generator maintenance" required /></label>
-          <button type="submit">Add category</button>
-        </form>
+        <div className="category-actions">
+          {needsDefaults && <form action={setupDefaultExpenseCategories}><button type="submit">Set up 12 standard categories</button></form>}
+          <form className="category-form" action={addExpenseCategory}>
+            <label>New category<input name="name" maxLength={60} placeholder="e.g. Generator maintenance" required /></label>
+            <button type="submit">Add category</button>
+          </form>
+        </div>
         {allCats.length ? <div className="category-list">
           {allCats.map(category => (
             <div className={`category-chip${category.active ? "" : " inactive"}`} key={category.id}>

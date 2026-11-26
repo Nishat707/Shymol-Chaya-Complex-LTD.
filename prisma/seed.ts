@@ -2,10 +2,10 @@ import postgres from "@prisma/orm-postgres/runtime";
 import { contractFromJson } from "@prisma/orm-postgres/static";
 import type { Contract } from "../src/prisma/contract.d";
 import contractJson from "../src/prisma/contract.json" with { type: "json" };
+import { DEFAULT_EXPENSE_CATEGORIES } from "../lib/expense-categories";
 
 const db = postgres({ contract: contractFromJson<Contract>(contractJson), url: process.env.DATABASE_URL ?? "" });
 const LAYOUT: Record<number, string> = { 2: "AB", 3: "ABCDEF", 4: "ABCDEF", 5: "ABCDEF", 6: "ABCDEF", 7: "ABCDEF", 8: "ABCDEF", 9: "ABCDEF", 10: "ABCDEF" };
-const CATEGORIES = ["Electricity","Staff Salaries","Generator Maintenance","Lift Maintenance","Water Management","Cleaning and Hygiene","Security","Electrical Maintenance","Building Maintenance","Gardening and Outdoor","Administrative Expenses","Other / Miscellaneous"];
 
 async function main() {
   for (const [floor, letters] of Object.entries(LAYOUT))
@@ -13,7 +13,7 @@ async function main() {
       const number = `${floor}${l}`;
       if (!(await db.orm.public.Flat.first({ number }))) await db.orm.public.Flat.create({ number, floor: Number(floor) });
     }
-  for (const name of CATEGORIES)
+  for (const name of DEFAULT_EXPENSE_CATEGORIES)
     if (!(await db.orm.public.ExpenseCategory.first({ name }))) await db.orm.public.ExpenseCategory.create({ name });
   if (!(await db.orm.public.ChargeSetting.aggregate((a) => ({ n: a.count() }))).n)
     await db.orm.public.ChargeSetting.create({ amount: "3000", effectiveFrom: "2026-01-01" });

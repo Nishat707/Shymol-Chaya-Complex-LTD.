@@ -42,8 +42,11 @@ button.sec,.btn.sec { background:transparent; color:var(--ink); border:1px solid
 .section-heading h2 { margin:0; }
 .section-heading p,.empty-state { color:var(--muted); font-size:13px; margin:4px 0 0; }
 .category-panel { background:linear-gradient(135deg,#fff,#f5fbf7); }
+.category-actions { display:grid; gap:12px; margin:15px 0; }
+.category-actions>form:first-child button { background:linear-gradient(110deg,#2773b8,#568ed1); }
 .category-form { display:flex; align-items:flex-end; gap:10px; margin:15px 0; }
 .category-form label { flex:1; }
+.field-help { color:#a05024; font-size:11px; }
 .category-count { background:#e2f4e8; color:#23643d; border-radius:999px; padding:5px 10px; font-size:12px; font-weight:700; white-space:nowrap; }
 .category-list { display:flex; flex-wrap:wrap; gap:8px; }
 .category-chip { display:flex; align-items:center; gap:10px; background:#eaf6ee; color:#255c3c; border:1px solid #d4eadb; border-radius:999px; padding:5px 6px 5px 12px; font-size:13px; }
@@ -51,6 +54,32 @@ button.sec,.btn.sec { background:transparent; color:var(--ink); border:1px solid
 .category-toggle { padding:4px 9px; background:#fff; color:#23643d; border:1px solid #cfe4d5; border-radius:999px; box-shadow:none; font-size:11px; }
 .category-chip.inactive .category-toggle { color:#51645a; }
 .category-toggle:hover { box-shadow:none; }
+.dashboard-section-title { margin:24px 0 12px; }
+.chart-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:14px; }
+.chart-card { min-width:0; }
+.chart-heading h2 { margin:0; }
+.chart-heading p { color:var(--muted); font-size:12px; margin:4px 0 16px; }
+.rank-list { list-style:none; display:grid; gap:15px; padding:0; margin:0; }
+.rank-line { display:flex; justify-content:space-between; align-items:center; gap:10px; font-size:12px; }
+.rank-line>span { display:flex; align-items:center; min-width:0; }
+.rank-line strong { white-space:nowrap; font-variant-numeric:tabular-nums; }
+.rank-number { display:inline-grid; place-items:center; flex:0 0 24px; height:24px; margin-right:8px; border-radius:8px; background:#e2f4e8; color:#23643d; font-size:11px; font-style:normal; font-weight:750; }
+.rank-1 { background:#e3effb; color:#3278b6; }
+.rank-2 { background:#fff0d9; color:#ad701a; }
+.rank-3 { background:#f0e7fb; color:#7f54ae; }
+.rank-4 { background:#fbe8e5; color:#ad5347; }
+.chart-track { height:8px; margin:7px 0 0 32px; overflow:hidden; border-radius:99px; background:#edf2ee; }
+.chart-bar { display:block; height:100%; min-width:3px; border-radius:inherit; background:linear-gradient(90deg,#2c9b64,#a6d75c); transition:width .6s ease; }
+.chart-bar-1 { background:linear-gradient(90deg,#378cdd,#76c4e7); }
+.chart-bar-2 { background:linear-gradient(90deg,#ed9a32,#f1cf68); }
+.chart-bar-3 { background:linear-gradient(90deg,#9b75d0,#d8a4de); }
+.chart-bar-4 { background:linear-gradient(90deg,#e16e61,#f3a18a); }
+.notice-board { background:linear-gradient(135deg,#fff,#fffaf0); }
+.notice-count { padding:4px 9px; border-radius:999px; background:#fff0d9; color:#8f641e; font-size:11px; font-weight:700; }
+.resident-notice { padding:13px 0; border-top:1px solid #f0eadc; }
+.notice-title { display:flex; align-items:center; gap:9px; }
+.resident-notice p { margin:6px 0; color:#52675b; white-space:pre-wrap; }
+.resident-notice time { color:#829087; font-size:11px; }
 .msg { padding:9px 12px; border-radius:6px; margin-bottom:12px; } .msg.err { background:#f7e1dd; color:var(--due); } .msg.ok { background:#dff0e5; color:var(--ok); }
 .tag { padding:1px 8px; border-radius:10px; color:#fff; font-size:12px; } .tag.g{background:var(--ok)} .tag.y{background:var(--warn)} .tag.r{background:var(--due)} .tag.n{background:#9aa49e}
 .void { opacity:.5; text-decoration:line-through; }
@@ -73,6 +102,7 @@ button.sec,.btn.sec { background:transparent; color:var(--ink); border:1px solid
   .top form { margin-left:0; }
   .nav-identity { width:100%; order:3; }
   .category-form { align-items:stretch; flex-direction:column; }
+  .rank-line { align-items:flex-start; }
 }
 
 .preview-shell { min-height:100vh; display:grid; grid-template-columns:240px minmax(0,1fr); background:#f4f6f4; color:#1e2d25; }

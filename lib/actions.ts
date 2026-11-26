@@ -6,6 +6,7 @@ import { requireStaff } from "./session";
 import { PAY_METHODS, recordPayment, voidPayment, type PayMethod } from "./payments";
 import { generateMonth } from "./billing";
 import { monthOfDate } from "./dates";
+import { DEFAULT_EXPENSE_CATEGORIES } from "./expense-categories";
 
 const str = (fd: FormData, k: string) => String(fd.get(k) ?? "").trim();
 const day = (v: string) => { if (!/^\d{4}-\d{2}-\d{2}$/.test(v)) throw new Error("Enter a valid date."); return v; };
@@ -65,6 +66,23 @@ export async function addExpenseCategory(fd: FormData) {
     }
     const category = await db().orm.public.ExpenseCategory.create({ name });
     await audit(s.userId, "ADD_EXPENSE_CATEGORY", "ExpenseCategory", category.id, null, { name: category.name, active: category.active });
+  });
+}
+export async function setupDefaultExpenseCategories() {
+  await run("/admin/expenses", async () => {
+    const s = await requireStaff();
+    const categories = await db().orm.public.ExpenseCategory.all();
+    for (const name of DEFAULT_EXPENSE_CATEGORIES) {
+      const existing = categories.find((category) => category.name.toLowerCase() === name.toLowerCase());
+      if (existing?.active) continue;
+      if (existing) {
+        await db().orm.public.ExpenseCategory.where({ id: existing.id }).update({ active: true });
+        await audit(s.userId, "REACTIVATE_EXPENSE_CATEGORY", "ExpenseCategory", existing.id, { active: false }, { active: true });
+      } else {
+        const category = await db().orm.public.ExpenseCategory.create({ name });
+        await audit(s.userId, "ADD_EXPENSE_CATEGORY", "ExpenseCategory", category.id, null, { name: category.name, active: category.active });
+      }
+    }
   });
 }
 export async function toggleExpenseCategory(fd: FormData) {
