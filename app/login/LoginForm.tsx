@@ -4,7 +4,9 @@ import { useSearchParams } from "next/navigation";
 import { useState, type FormEvent } from "react";
 
 export default function LoginForm({ supabaseUrl, supabaseAnonKey }: { supabaseUrl: string; supabaseAnonKey: string }) {
-  const err = useSearchParams().get("error");
+  const searchParams = useSearchParams();
+  const err = searchParams.get("error");
+  const loggedOut = searchParams.get("loggedOut") === "1";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -67,6 +69,8 @@ export default function LoginForm({ supabaseUrl, supabaseAnonKey }: { supabaseUr
       <p>Sign in with the email account registered for your flat or staff role.</p>
       {err === "unauthorized" && <p className="login-error" role="alert">This email is not approved for access. Ask the building manager to check your account.</p>}
       {err === "auth" && <p className="login-error" role="alert">That sign-in or password-reset link could not be verified. Request a new link and try again.</p>}
+      {err === "logout" && <p className="login-error" role="alert">We couldn't finish signing you out. Please try again.</p>}
+      {loggedOut && <p className="login-success" role="status">You have been signed out.</p>}
       {error && <p className="login-error" role="alert">{error}</p>}
       <form className="login-form" onSubmit={signIn}>
         <label>Email<input type="email" autoComplete="username" value={email} onChange={event => setEmail(event.target.value)} required /></label>

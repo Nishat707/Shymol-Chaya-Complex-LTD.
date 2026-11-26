@@ -1,10 +1,8 @@
 import { db } from "@/lib/db";
 import { summary } from "@/lib/finance";
 import { taka } from "@/lib/dates";
-import { requireResident } from "@/lib/session";
 
 export default async function Resident() {
-  await requireResident();
   const d = db();
   const [totals, flats, expenses] = await Promise.all([
     summary(),
@@ -34,11 +32,11 @@ export default async function Resident() {
   return (
     <>
       <h1>Community Dashboard</h1>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(170px,1fr))", gap: 12 }}>
-        {cards.map(([label, amount]) => (
-          <div className="card" key={label}>
-            <div style={{ color: "#66736c", fontSize: 13 }}>{label}</div>
-            <div style={{ fontSize: 22, fontWeight: 700 }}>{taka(amount)}</div>
+      <div className="metric-grid">
+        {cards.map(([label, amount], i) => (
+          <div className={`card metric-card metric-${i}`} key={label}>
+            <div className="metric-label">{label}</div>
+            <div className="metric-value">{taka(amount)}</div>
           </div>
         ))}
       </div>

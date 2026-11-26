@@ -10,10 +10,10 @@ Next.js (App Router, TypeScript) · Prisma · PostgreSQL and email/password auth
 | Area | Details |
 |---|---|
 | Flats | 50 flats seeded (2A–2B, 3A–10F). Edit owner/tenant/phone/occupancy/custom charge. Ledger per flat. |
-| Residents | Admin registers each resident email against a flat. Unregistered accounts are rejected. Residents see a read-only community dashboard with building-wide balance/dues, per-flat owner dues, and recent paid expenses; staff-only pages remain restricted. |
+| Residents | Admin registers each resident email against a flat. Unregistered accounts are rejected. Residents see a read-only community dashboard with building-wide balance/dues, per-flat owner dues, and recent paid expenses; staff-only pages remain restricted. Staff and residents can sign out from the app navigation. |
 | Billing | Default charge with effective-date history, per-flat overrides, idempotent monthly generation; billed amounts are snapshots and never change. |
 | Payments | Oldest-month-first allocation, partial and multi-month, overpayment rejected, unique receipt numbers, printable receipt, void with reason, CSV export. |
-| Expenses | 12 seeded categories; "recorded" vs "paid" are separate; void with reason. |
+| Expenses | Manage active categories; "recorded" vs "paid" are separate; void with reason. |
 | Balance | Opening balance + money received − expenses paid. Unpaid charges and unpaid expenses are not counted. |
 | Notices | Publish with priority and expiry; shown on the resident page. |
 | Roles | Super Admin: everything. Manager: payments, expenses, flats, residents, notices, bill generation. Only Super Admin: default charge, opening balance, month closing, managers. |
@@ -21,7 +21,7 @@ Next.js (App Router, TypeScript) · Prisma · PostgreSQL and email/password auth
 
 ## Not built yet
 Charts, PDF/Excel exports (CSV for payments only), file uploads (receipts/proofs), maintenance task screens
-(table exists), expense category management screen, configurable Manager permissions (roles are fixed in code),
+(table exists), configurable Manager permissions (roles are fixed in code),
 reports pages, search/filters, automated tests beyond `tests/allocate.test.ts`. Ask for these next.
 
 ## Requirements

@@ -43,9 +43,43 @@ export async function addExpense(fd: FormData) {
   await run("/admin/expenses", async () => {
     const s = await requireStaff(); const d = day(str(fd, "date")); await assertOpen(d);
     if (!str(fd, "title")) throw new Error("Enter a title.");
+    const category = await db().orm.public.ExpenseCategory.firstOrThrow({ id: str(fd, "category") });
+    if (!category.active) throw new Error("Choose an active expense category.");
     const paid = str(fd, "paid") === "1";
     const e = await db().orm.public.Expense.create({ title: str(fd, "title"), categoryId: str(fd, "category"), amount: amount(str(fd, "amount")), expenseDate: d, vendor: str(fd, "vendor") || null, description: str(fd, "description") || null, method: paid ? method(str(fd, "method")) : null, status: paid ? "PAID" : "RECORDED", paidOn: paid ? d : null, createdById: s.userId });
     await audit(s.userId, "ADD_EXPENSE", "Expense", e.id, null, { title: e.title, amount: e.amount, status: e.status });
+  });
+}
+export async function addExpenseCategory(fd: FormData) {
+  await run("/admin/expenses", async () => {
+    const s = await requireStaff();
+    const name = str(fd, "name");
+    if (!name || name.length > 60) throw new Error("Enter a category name up to 60 characters.");
+    const categories = await db().orm.public.ExpenseCategory.all();
+    const existing = categories.find((category) => category.name.toLowerCase() === name.toLowerCase());
+    if (existing?.active) throw new Error("That expense category already exists.");
+    if (existing) {
+      await db().orm.public.ExpenseCategory.where({ id: existing.id }).update({ active: true });
+      await audit(s.userId, "REACTIVATE_EXPENSE_CATEGORY", "ExpenseCategory", existing.id, { active: false }, { active: true });
+      return;
+    }
+    const category = await db().orm.public.ExpenseCategory.create({ name });
+    await audit(s.userId, "ADD_EXPENSE_CATEGORY", "ExpenseCategory", category.id, null, { name: category.name, active: category.active });
+  });
+}
+export async function toggleExpenseCategory(fd: FormData) {
+  await run("/admin/expenses", async () => {
+    const s = await requireStaff();
+    const category = await db().orm.public.ExpenseCategory.firstOrThrow({ id: str(fd, "id") });
+    await db().orm.public.ExpenseCategory.where({ id: category.id }).update({ active: !category.active });
+    await audit(
+      s.userId,
+      category.active ? "DEACTIVATE_EXPENSE_CATEGORY" : "REACTIVATE_EXPENSE_CATEGORY",
+      "ExpenseCategory",
+      category.id,
+      { active: category.active },
+      { active: !category.active },
+    );
   });
 }
 export async function payExpense(fd: FormData) {

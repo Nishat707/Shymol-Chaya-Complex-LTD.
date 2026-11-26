@@ -13,8 +13,8 @@ export default async function Admin() {
   return (
     <>
       <h1>Overview</h1>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(170px,1fr))", gap: 12 }}>
-        {cards.map(([k, v]) => <div className="card" key={k}><div style={{ color: "#66736c", fontSize: 13 }}>{k}</div><div style={{ fontSize: 22, fontWeight: 700 }}>{v}</div></div>)}
+      <div className="metric-grid">
+        {cards.map(([k, v], i) => <div className={`card metric-card metric-${i}`} key={k}><div className="metric-label">{k}</div><div className="metric-value">{v}</div></div>)}
       </div>
       <p>Not built yet: charts, maintenance tasks, PDF/Excel export, file uploads. See README.</p>
     </>
