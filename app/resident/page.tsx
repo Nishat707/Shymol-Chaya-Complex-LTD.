@@ -6,8 +6,6 @@ import { requireResident } from "@/lib/session";
 export default async function Resident() {
   const session = await requireResident();
   const d = db();
-  const today = new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Dhaka" });
-  const thisMonth = today.slice(0, 7);
   const flatId = session.flatIds[0];
   const resident = await d.orm.public.FlatResident.first({ email: session.email, active: true });
   const [flat, charges, payments, expenses, notices, suggestions, maintenance] = await Promise.all([
@@ -19,25 +17,12 @@ export default async function Resident() {
     resident ? d.orm.public.ResidentSuggestion.where({ residentId: resident.id }).orderBy((s) => s.updatedAt.desc()).limit(10).all() : [],
     resident ? d.orm.public.MaintenanceRequest.where({ residentId: resident.id }).orderBy((r) => r.updatedAt.desc()).limit(10).all() : [],
   ]);
-  const thisCharge = charges.find((charge) => charge.month === thisMonth);
-  const currentCharge = thisCharge ? Number(thisCharge.amount) - Number(thisCharge.waived) : 0;
-  const outstanding = charges.reduce((sum, charge) => sum + Number(charge.amount) - Number(charge.waived) -
-    charge.allocations.reduce((paid, allocation) => paid + Number(allocation.amount), 0), 0);
-  const totalPaid = payments.reduce((sum, payment) => sum + Number(payment.amount), 0);
-  const latestPayment = payments[0];
-  const cards: [string, string][] = [
-    ["Current month service charge", taka(currentCharge)],
-    ["Total outstanding dues", taka(Math.max(0, outstanding))],
-    ["Total amount paid", taka(totalPaid)],
-    ["Latest payment status", latestPayment ? "Recorded" : "No payment"],
-  ];
   const history = [...charges].sort((a, b) => a.month.localeCompare(b.month)).slice(-12);
 
   return (
     <>
       <h1>Resident Dashboard</h1>
       {flat && <p>Flat {flat.number} · {resident?.name ?? session.email}</p>}
-      <div className="metric-grid">{cards.map(([label, amount], i) => <div className={`card metric-card metric-${i}`} key={label}><div className="metric-label">{label}</div><div className="metric-value">{amount}</div></div>)}</div>
       <div className="chart-grid">
         <section className="card tw"><h2>Monthly overview</h2><table><thead><tr><th>Month</th><th className="n">Charged</th><th className="n">Paid</th><th className="n">Balance</th></tr></thead><tbody>{history.map((charge) => {
           const paid = charge.allocations.reduce((sum, allocation) => sum + Number(allocation.amount), 0);

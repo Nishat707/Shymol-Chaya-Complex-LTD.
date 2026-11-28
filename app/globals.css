@@ -11,6 +11,10 @@ h1 { font-size:27px; letter-spacing:-.5px; margin:0 0 18px; } h2 { font-size:18p
 .nav-logout { color:#fff; background:#ffffff1a; border:1px solid #ffffff50; padding:6px 12px; font-size:13px; }
 .nav-logout:hover { background:#ffffff30; }
 .app-content { padding-top:20px; }
+.resident-account-summary { margin-top:16px; }
+.resident-account-summary h2 { margin:0 0 10px; font-size:16px; }
+.resident-account-summary .metric-grid { margin-bottom:0; }
+.app-attribution { border-top:1px solid var(--line); color:var(--muted); font-size:12px; margin-top:30px; padding:16px 0 4px; text-align:center; }
 .card { background:linear-gradient(145deg,#fff,#fbfefc); border:1px solid var(--line); border-radius:12px; padding:18px; margin-bottom:16px; box-shadow:var(--shadow); }
 .metric-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(185px,1fr)); gap:14px; margin-bottom:20px; }
 .metric-card { position:relative; overflow:hidden; min-height:112px; transition:transform .2s ease,box-shadow .2s ease; }
