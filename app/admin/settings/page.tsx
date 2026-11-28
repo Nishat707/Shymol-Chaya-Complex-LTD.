@@ -1,11 +1,12 @@
 import { db } from "@/lib/db";
-import { requireStaff } from "@/lib/session";
+import { requirePermission, requireStaff } from "@/lib/session";
 import { taka } from "@/lib/dates";
-import { generateBills, setDefaultCharge, setOpening, closeMonth, reopenMonth, addManager, toggleManager } from "@/lib/actions";
+import { generateBills, setDefaultCharge, setOpening, closeMonth, reopenMonth, addManager, toggleManager, saveManagerPermissions } from "@/lib/actions";
 import { Msg } from "@/components/Msg";
 
 export default async function Settings({ searchParams }: { searchParams: Promise<{ err?: string; ok?: string }> }) {
   const sp = await searchParams; const s = await requireStaff(); const sa = s.role === "SUPER_ADMIN";
+  await requirePermission("settings");
   const d = db();
   const [charges, closed, managers, opening] = await Promise.all([
     d.orm.public.ChargeSetting.orderBy((c) => c.effectiveFrom.desc()).all(), d.orm.public.MonthClose.orderBy((c) => c.month.desc()).all(),
@@ -30,6 +31,16 @@ export default async function Settings({ searchParams }: { searchParams: Promise
         <p>Create a confirmed Supabase Auth user with the same email after adding a manager here.</p>
         <form className="grid card" action={addManager}><label>Email<input name="email" type="email" required /></label><label>Name<input name="name" /></label><button>Add manager</button></form>
         {managers.map(m => <form key={m.id} action={toggleManager} className="inline card"><input type="hidden" name="id" value={m.id} /><span className={m.active ? "" : "void"}>{m.email}</span><button className="sec">{m.active ? "Deactivate" : "Activate"}</button></form>)}
+        <h2>Manager permissions</h2>
+        {managers.map(m => {
+          const p = (m.permissions as Record<string, boolean>) ?? {};
+          const keys = ["payments","expenses","flats","notices","residents","reports","suggestions","maintenance","audit","settings"];
+          return <form key={m.id} className="card" action={saveManagerPermissions}>
+            <input type="hidden" name="id" value={m.id} /><b>{m.email}</b>
+            <div className="category-list" style={{ marginTop:10 }}>{keys.map((key)=><label key={key} style={{ flexDirection:"row", alignItems:"center" }}><input type="checkbox" name={key} value="1" defaultChecked={p[key] === true} /> {key}</label>)}</div>
+            <button className="sec">Save permissions</button>
+          </form>;
+        })}
       </>}
     </>
   );

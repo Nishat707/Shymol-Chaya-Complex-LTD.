@@ -3,8 +3,10 @@ import { db } from "@/lib/db";
 import { taka } from "@/lib/dates";
 import { addPayment, voidPay } from "@/lib/actions";
 import { Msg } from "@/components/Msg";
+import { requirePermission } from "@/lib/session";
 
 export default async function Payments({ searchParams }: { searchParams: Promise<{ err?: string; ok?: string }> }) {
+  await requirePermission("payments");
   const sp = await searchParams;
   const d = db();
   const [flats, pays] = await Promise.all([

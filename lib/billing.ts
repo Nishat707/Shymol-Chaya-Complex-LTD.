@@ -14,5 +14,11 @@ export async function generateMonth(month: string, actorId: string) {
     { onConflict: "skip", conflictOn: ["flatId", "month"] },
   );
   await db().orm.public.AuditLog.create({ actorId, action: "GENERATE_MONTH", entity: "MonthlyCharge", entityId: month, after: { created: created.length } });
+  if (created.length) {
+    for (const flat of flats) {
+      const residents = await db().orm.public.FlatResident.where({ flatId: flat.id, active: true }).all();
+      for (const resident of residents) await db().orm.public.Notification.create({ recipientEmail: resident.email, type: "CHARGE", title: "New service charge assigned", body: `A service charge for ${month} was assigned to Flat ${flat.number}`, href: "/resident" });
+    }
+  }
   return created.length;
 }

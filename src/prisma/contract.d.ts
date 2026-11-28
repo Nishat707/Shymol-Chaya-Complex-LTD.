@@ -18,9 +18,9 @@ import type {
 } from '@prisma/orm-postgres/contract-types';
 
 export type StorageHash =
-  StorageHashBase<'1db16a860df7a2e17240d9010512090ba3ff71752ef3764b2cd82f1356b430cf'>;
+  StorageHashBase<'655584a5eb21117f201f3d9815f9ef5753b5394d31c8f8a15b10f81736f34f16'>;
 export type ExecutionHash =
-  ExecutionHashBase<'9f0b715ec55a74b707b49aa5f64e8c2653a2eb47b63adf1228a2801de2bee3e8'>;
+  ExecutionHashBase<'e3f2e9ffecfcac558ded3dfd41422f2fb3b88ae97e45e2c9ad0b7f81449bb229'>;
 export type ProfileHash =
   ProfileHashBase<'3916f444a8a17ad749191acf9e08dad97d1a327b88c2f1d45d12f240296aa8b2'>;
 
@@ -289,6 +289,30 @@ type FieldTypeOverrides = {
           readonly input: 'OCCUPIED' | 'VACANT';
         };
       };
+      readonly MaintenanceRequest: {
+        readonly category: {
+          readonly output:
+            | 'PLUMBING'
+            | 'ELECTRICAL'
+            | 'ELEVATOR'
+            | 'CLEANING'
+            | 'SECURITY'
+            | 'COMMON_AREA'
+            | 'OTHER';
+          readonly input:
+            | 'PLUMBING'
+            | 'ELECTRICAL'
+            | 'ELEVATOR'
+            | 'CLEANING'
+            | 'SECURITY'
+            | 'COMMON_AREA'
+            | 'OTHER';
+        };
+        readonly status: {
+          readonly output: 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'REJECTED';
+          readonly input: 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'REJECTED';
+        };
+      };
       readonly MaintenanceTask: {
         readonly status: {
           readonly output: 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
@@ -296,15 +320,40 @@ type FieldTypeOverrides = {
         };
       };
       readonly Notice: {
+        readonly category: {
+          readonly output: 'GENERAL' | 'MAINTENANCE' | 'EMERGENCY' | 'PAYMENT_REMINDER';
+          readonly input: 'GENERAL' | 'MAINTENANCE' | 'EMERGENCY' | 'PAYMENT_REMINDER';
+        };
         readonly priority: {
           readonly output: 'NORMAL' | 'IMPORTANT' | 'URGENT';
           readonly input: 'NORMAL' | 'IMPORTANT' | 'URGENT';
+        };
+      };
+      readonly Notification: {
+        readonly type: {
+          readonly output:
+            'NOTICE' | 'PAYMENT' | 'CHARGE' | 'SUGGESTION' | 'MAINTENANCE' | 'SYSTEM';
+          readonly input: 'NOTICE' | 'PAYMENT' | 'CHARGE' | 'SUGGESTION' | 'MAINTENANCE' | 'SYSTEM';
         };
       };
       readonly Payment: {
         readonly method: {
           readonly output: 'CASH' | 'BANK_TRANSFER' | 'MOBILE_FINANCIAL_SERVICE' | 'OTHER';
           readonly input: 'CASH' | 'BANK_TRANSFER' | 'MOBILE_FINANCIAL_SERVICE' | 'OTHER';
+        };
+      };
+      readonly ResidentSuggestion: {
+        readonly category: {
+          readonly output: 'MAINTENANCE' | 'SECURITY' | 'CLEANLINESS' | 'MANAGEMENT' | 'OTHER';
+          readonly input: 'MAINTENANCE' | 'SECURITY' | 'CLEANLINESS' | 'MANAGEMENT' | 'OTHER';
+        };
+        readonly priority: {
+          readonly output: 'NORMAL' | 'IMPORTANT' | 'URGENT';
+          readonly input: 'NORMAL' | 'IMPORTANT' | 'URGENT';
+        };
+        readonly status: {
+          readonly output: 'SUBMITTED' | 'UNDER_REVIEW' | 'IN_PROGRESS' | 'RESOLVED' | 'CLOSED';
+          readonly input: 'SUBMITTED' | 'UNDER_REVIEW' | 'IN_PROGRESS' | 'RESOLVED' | 'CLOSED';
         };
       };
       readonly User: {
@@ -350,6 +399,30 @@ type ColumnTypeOverrides = {
         readonly input: 'OCCUPIED' | 'VACANT';
       };
     };
+    readonly MaintenanceRequest: {
+      readonly category: {
+        readonly output:
+          | 'PLUMBING'
+          | 'ELECTRICAL'
+          | 'ELEVATOR'
+          | 'CLEANING'
+          | 'SECURITY'
+          | 'COMMON_AREA'
+          | 'OTHER';
+        readonly input:
+          | 'PLUMBING'
+          | 'ELECTRICAL'
+          | 'ELEVATOR'
+          | 'CLEANING'
+          | 'SECURITY'
+          | 'COMMON_AREA'
+          | 'OTHER';
+      };
+      readonly status: {
+        readonly output: 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'REJECTED';
+        readonly input: 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'REJECTED';
+      };
+    };
     readonly MaintenanceTask: {
       readonly status: {
         readonly output: 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
@@ -357,15 +430,39 @@ type ColumnTypeOverrides = {
       };
     };
     readonly Notice: {
+      readonly category: {
+        readonly output: 'GENERAL' | 'MAINTENANCE' | 'EMERGENCY' | 'PAYMENT_REMINDER';
+        readonly input: 'GENERAL' | 'MAINTENANCE' | 'EMERGENCY' | 'PAYMENT_REMINDER';
+      };
       readonly priority: {
         readonly output: 'NORMAL' | 'IMPORTANT' | 'URGENT';
         readonly input: 'NORMAL' | 'IMPORTANT' | 'URGENT';
+      };
+    };
+    readonly Notification: {
+      readonly type: {
+        readonly output: 'NOTICE' | 'PAYMENT' | 'CHARGE' | 'SUGGESTION' | 'MAINTENANCE' | 'SYSTEM';
+        readonly input: 'NOTICE' | 'PAYMENT' | 'CHARGE' | 'SUGGESTION' | 'MAINTENANCE' | 'SYSTEM';
       };
     };
     readonly Payment: {
       readonly method: {
         readonly output: 'CASH' | 'BANK_TRANSFER' | 'MOBILE_FINANCIAL_SERVICE' | 'OTHER';
         readonly input: 'CASH' | 'BANK_TRANSFER' | 'MOBILE_FINANCIAL_SERVICE' | 'OTHER';
+      };
+    };
+    readonly ResidentSuggestion: {
+      readonly category: {
+        readonly output: 'MAINTENANCE' | 'SECURITY' | 'CLEANLINESS' | 'MANAGEMENT' | 'OTHER';
+        readonly input: 'MAINTENANCE' | 'SECURITY' | 'CLEANLINESS' | 'MANAGEMENT' | 'OTHER';
+      };
+      readonly priority: {
+        readonly output: 'NORMAL' | 'IMPORTANT' | 'URGENT';
+        readonly input: 'NORMAL' | 'IMPORTANT' | 'URGENT';
+      };
+      readonly status: {
+        readonly output: 'SUBMITTED' | 'UNDER_REVIEW' | 'IN_PROGRESS' | 'RESOLVED' | 'CLOSED';
+        readonly input: 'SUBMITTED' | 'UNDER_REVIEW' | 'IN_PROGRESS' | 'RESOLVED' | 'CLOSED';
       };
     };
     readonly User: {
@@ -462,8 +559,24 @@ export namespace Models {
     flatId: FieldOutputTypes['public']['FlatResident']['flatId'];
     id: FieldOutputTypes['public']['FlatResident']['id'];
     name: FieldOutputTypes['public']['FlatResident']['name'];
+    phone: FieldOutputTypes['public']['FlatResident']['phone'];
+    photoUrl: FieldOutputTypes['public']['FlatResident']['photoUrl'];
     flat: public_Flat;
     readonly [RelationKeys]?: 'flat';
+  };
+  export type public_MaintenanceRequest = {
+    adminComment: FieldOutputTypes['public']['MaintenanceRequest']['adminComment'];
+    category: FieldOutputTypes['public']['MaintenanceRequest']['category'];
+    description: FieldOutputTypes['public']['MaintenanceRequest']['description'];
+    flatId: FieldOutputTypes['public']['MaintenanceRequest']['flatId'];
+    id: FieldOutputTypes['public']['MaintenanceRequest']['id'];
+    photoUrl: FieldOutputTypes['public']['MaintenanceRequest']['photoUrl'];
+    residentId: FieldOutputTypes['public']['MaintenanceRequest']['residentId'];
+    status: FieldOutputTypes['public']['MaintenanceRequest']['status'];
+    submittedAt: FieldOutputTypes['public']['MaintenanceRequest']['submittedAt'];
+    title: FieldOutputTypes['public']['MaintenanceRequest']['title'];
+    updatedAt: FieldOutputTypes['public']['MaintenanceRequest']['updatedAt'];
+    readonly [RelationKeys]?: never;
   };
   export type public_MaintenanceTask = {
     actualCost: FieldOutputTypes['public']['MaintenanceTask']['actualCost'];
@@ -501,12 +614,25 @@ export namespace Models {
   };
   export type public_Notice = {
     body: FieldOutputTypes['public']['Notice']['body'];
+    category: FieldOutputTypes['public']['Notice']['category'];
     createdById: FieldOutputTypes['public']['Notice']['createdById'];
     expiresAt: FieldOutputTypes['public']['Notice']['expiresAt'];
     id: FieldOutputTypes['public']['Notice']['id'];
+    pinned: FieldOutputTypes['public']['Notice']['pinned'];
     priority: FieldOutputTypes['public']['Notice']['priority'];
     publishedAt: FieldOutputTypes['public']['Notice']['publishedAt'];
     title: FieldOutputTypes['public']['Notice']['title'];
+    readonly [RelationKeys]?: never;
+  };
+  export type public_Notification = {
+    body: FieldOutputTypes['public']['Notification']['body'];
+    createdAt: FieldOutputTypes['public']['Notification']['createdAt'];
+    href: FieldOutputTypes['public']['Notification']['href'];
+    id: FieldOutputTypes['public']['Notification']['id'];
+    readAt: FieldOutputTypes['public']['Notification']['readAt'];
+    recipientEmail: FieldOutputTypes['public']['Notification']['recipientEmail'];
+    title: FieldOutputTypes['public']['Notification']['title'];
+    type: FieldOutputTypes['public']['Notification']['type'];
     readonly [RelationKeys]?: never;
   };
   export type public_Payment = {
@@ -536,6 +662,20 @@ export namespace Models {
     payment: public_Payment;
     readonly [RelationKeys]?: 'charge' | 'payment';
   };
+  export type public_ResidentSuggestion = {
+    adminResponse: FieldOutputTypes['public']['ResidentSuggestion']['adminResponse'];
+    category: FieldOutputTypes['public']['ResidentSuggestion']['category'];
+    description: FieldOutputTypes['public']['ResidentSuggestion']['description'];
+    flatId: FieldOutputTypes['public']['ResidentSuggestion']['flatId'];
+    id: FieldOutputTypes['public']['ResidentSuggestion']['id'];
+    priority: FieldOutputTypes['public']['ResidentSuggestion']['priority'];
+    residentId: FieldOutputTypes['public']['ResidentSuggestion']['residentId'];
+    status: FieldOutputTypes['public']['ResidentSuggestion']['status'];
+    submittedAt: FieldOutputTypes['public']['ResidentSuggestion']['submittedAt'];
+    title: FieldOutputTypes['public']['ResidentSuggestion']['title'];
+    updatedAt: FieldOutputTypes['public']['ResidentSuggestion']['updatedAt'];
+    readonly [RelationKeys]?: never;
+  };
   export type public_Setting = {
     key: FieldOutputTypes['public']['Setting']['key'];
     value: FieldOutputTypes['public']['Setting']['value'];
@@ -562,12 +702,15 @@ export declare const models: {
     ExpenseCategory: Models.public_ExpenseCategory;
     Flat: Models.public_Flat;
     FlatResident: Models.public_FlatResident;
+    MaintenanceRequest: Models.public_MaintenanceRequest;
     MaintenanceTask: Models.public_MaintenanceTask;
     MonthClose: Models.public_MonthClose;
     MonthlyCharge: Models.public_MonthlyCharge;
     Notice: Models.public_Notice;
+    Notification: Models.public_Notification;
     Payment: Models.public_Payment;
     PaymentAllocation: Models.public_PaymentAllocation;
+    ResidentSuggestion: Models.public_ResidentSuggestion;
     Setting: Models.public_Setting;
     User: Models.public_User;
   };
@@ -986,6 +1129,18 @@ type ContractBase = Omit<
                   readonly nullable: true;
                   readonly many: false;
                 };
+                readonly phone: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: true;
+                  readonly many: false;
+                };
+                readonly photoUrl: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: true;
+                  readonly many: false;
+                };
               };
               primaryKey: { readonly columns: readonly ['id'] };
               uniques: readonly [];
@@ -1010,6 +1165,109 @@ type ContractBase = Omit<
                   };
                 },
               ];
+            };
+            readonly MaintenanceRequest: {
+              columns: {
+                readonly adminComment: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: true;
+                  readonly many: false;
+                };
+                readonly category: {
+                  readonly dataType: 'pg/enum';
+                  readonly codecId: 'pg/enum@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'literal';
+                    readonly value: DefaultLiteralValue<'pg/enum@1', 'OTHER'>;
+                  };
+                  readonly typeParams: { readonly typeName: 'MaintenanceCategory' };
+                  readonly many: false;
+                };
+                readonly description: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly flatId: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly id: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly photoUrl: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: true;
+                  readonly many: false;
+                };
+                readonly residentId: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly status: {
+                  readonly dataType: 'pg/enum';
+                  readonly codecId: 'pg/enum@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'literal';
+                    readonly value: DefaultLiteralValue<'pg/enum@1', 'PENDING'>;
+                  };
+                  readonly typeParams: { readonly typeName: 'RequestStatus' };
+                  readonly many: false;
+                };
+                readonly submittedAt: {
+                  readonly dataType: 'pg/timestamp';
+                  readonly codecId: 'pg/timestamp-date@1';
+                  readonly nullable: false;
+                  readonly default: { readonly kind: 'function'; readonly expression: 'now()' };
+                  readonly typeParams: { readonly precision: 3 };
+                  readonly many: false;
+                };
+                readonly title: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly updatedAt: {
+                  readonly dataType: 'pg/timestamp';
+                  readonly codecId: 'pg/timestamp-date@1';
+                  readonly nullable: false;
+                  readonly typeParams: { readonly precision: 3 };
+                  readonly many: false;
+                };
+              };
+              primaryKey: { readonly columns: readonly ['id'] };
+              uniques: readonly [];
+              indexes: readonly [
+                {
+                  readonly name: 'MaintenanceRequest_flatId_idx';
+                  readonly columns: readonly ['flatId'];
+                  readonly unique: false;
+                },
+                {
+                  readonly name: 'MaintenanceRequest_residentId_idx';
+                  readonly columns: readonly ['residentId'];
+                  readonly unique: false;
+                },
+                {
+                  readonly name: 'MaintenanceRequest_status_idx';
+                  readonly columns: readonly ['status'];
+                  readonly unique: false;
+                },
+              ];
+              foreignKeys: readonly [];
             };
             readonly MaintenanceTask: {
               columns: {
@@ -1231,6 +1489,17 @@ type ContractBase = Omit<
                   readonly nullable: false;
                   readonly many: false;
                 };
+                readonly category: {
+                  readonly dataType: 'pg/enum';
+                  readonly codecId: 'pg/enum@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'literal';
+                    readonly value: DefaultLiteralValue<'pg/enum@1', 'GENERAL'>;
+                  };
+                  readonly typeParams: { readonly typeName: 'NoticeCategory' };
+                  readonly many: false;
+                };
                 readonly createdById: {
                   readonly dataType: 'pg/text';
                   readonly codecId: 'pg/text@1';
@@ -1248,6 +1517,16 @@ type ContractBase = Omit<
                   readonly dataType: 'pg/text';
                   readonly codecId: 'pg/text@1';
                   readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly pinned: {
+                  readonly dataType: 'pg/bool';
+                  readonly codecId: 'pg/bool@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'literal';
+                    readonly value: DefaultLiteralValue<'pg/bool@1', false>;
+                  };
                   readonly many: false;
                 };
                 readonly priority: {
@@ -1279,6 +1558,77 @@ type ContractBase = Omit<
               primaryKey: { readonly columns: readonly ['id'] };
               uniques: readonly [];
               indexes: readonly [];
+              foreignKeys: readonly [];
+            };
+            readonly Notification: {
+              columns: {
+                readonly body: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly createdAt: {
+                  readonly dataType: 'pg/timestamp';
+                  readonly codecId: 'pg/timestamp-date@1';
+                  readonly nullable: false;
+                  readonly default: { readonly kind: 'function'; readonly expression: 'now()' };
+                  readonly typeParams: { readonly precision: 3 };
+                  readonly many: false;
+                };
+                readonly href: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: true;
+                  readonly many: false;
+                };
+                readonly id: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly readAt: {
+                  readonly dataType: 'pg/timestamp';
+                  readonly codecId: 'pg/timestamp-date@1';
+                  readonly nullable: true;
+                  readonly typeParams: { readonly precision: 3 };
+                  readonly many: false;
+                };
+                readonly recipientEmail: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly title: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly type: {
+                  readonly dataType: 'pg/enum';
+                  readonly codecId: 'pg/enum@1';
+                  readonly nullable: false;
+                  readonly typeParams: { readonly typeName: 'NotificationType' };
+                  readonly many: false;
+                };
+              };
+              primaryKey: { readonly columns: readonly ['id'] };
+              uniques: readonly [];
+              indexes: readonly [
+                {
+                  readonly name: 'Notification_recipientEmail_idx';
+                  readonly columns: readonly ['recipientEmail'];
+                  readonly unique: false;
+                },
+                {
+                  readonly name: 'Notification_recipientEmail_readAt_idx';
+                  readonly columns: readonly ['recipientEmail', 'readAt'];
+                  readonly unique: false;
+                },
+              ];
               foreignKeys: readonly [];
             };
             readonly Payment: {
@@ -1465,6 +1815,114 @@ type ContractBase = Omit<
                 },
               ];
             };
+            readonly ResidentSuggestion: {
+              columns: {
+                readonly adminResponse: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: true;
+                  readonly many: false;
+                };
+                readonly category: {
+                  readonly dataType: 'pg/enum';
+                  readonly codecId: 'pg/enum@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'literal';
+                    readonly value: DefaultLiteralValue<'pg/enum@1', 'OTHER'>;
+                  };
+                  readonly typeParams: { readonly typeName: 'SuggestionCategory' };
+                  readonly many: false;
+                };
+                readonly description: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly flatId: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly id: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly priority: {
+                  readonly dataType: 'pg/enum';
+                  readonly codecId: 'pg/enum@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'literal';
+                    readonly value: DefaultLiteralValue<'pg/enum@1', 'NORMAL'>;
+                  };
+                  readonly typeParams: { readonly typeName: 'Priority' };
+                  readonly many: false;
+                };
+                readonly residentId: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly status: {
+                  readonly dataType: 'pg/enum';
+                  readonly codecId: 'pg/enum@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'literal';
+                    readonly value: DefaultLiteralValue<'pg/enum@1', 'SUBMITTED'>;
+                  };
+                  readonly typeParams: { readonly typeName: 'SuggestionStatus' };
+                  readonly many: false;
+                };
+                readonly submittedAt: {
+                  readonly dataType: 'pg/timestamp';
+                  readonly codecId: 'pg/timestamp-date@1';
+                  readonly nullable: false;
+                  readonly default: { readonly kind: 'function'; readonly expression: 'now()' };
+                  readonly typeParams: { readonly precision: 3 };
+                  readonly many: false;
+                };
+                readonly title: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly updatedAt: {
+                  readonly dataType: 'pg/timestamp';
+                  readonly codecId: 'pg/timestamp-date@1';
+                  readonly nullable: false;
+                  readonly typeParams: { readonly precision: 3 };
+                  readonly many: false;
+                };
+              };
+              primaryKey: { readonly columns: readonly ['id'] };
+              uniques: readonly [];
+              indexes: readonly [
+                {
+                  readonly name: 'ResidentSuggestion_flatId_idx';
+                  readonly columns: readonly ['flatId'];
+                  readonly unique: false;
+                },
+                {
+                  readonly name: 'ResidentSuggestion_residentId_idx';
+                  readonly columns: readonly ['residentId'];
+                  readonly unique: false;
+                },
+                {
+                  readonly name: 'ResidentSuggestion_status_idx';
+                  readonly columns: readonly ['status'];
+                  readonly unique: false;
+                },
+              ];
+              foreignKeys: readonly [];
+            };
             readonly Setting: {
               columns: {
                 readonly key: {
@@ -1558,6 +2016,33 @@ type ContractBase = Omit<
               readonly kind: 'valueSet';
               readonly values: readonly ['RECORDED', 'PAID', 'VOID'];
             };
+            readonly MaintenanceCategory: {
+              readonly kind: 'valueSet';
+              readonly values: readonly [
+                'PLUMBING',
+                'ELECTRICAL',
+                'ELEVATOR',
+                'CLEANING',
+                'SECURITY',
+                'COMMON_AREA',
+                'OTHER',
+              ];
+            };
+            readonly NoticeCategory: {
+              readonly kind: 'valueSet';
+              readonly values: readonly ['GENERAL', 'MAINTENANCE', 'EMERGENCY', 'PAYMENT_REMINDER'];
+            };
+            readonly NotificationType: {
+              readonly kind: 'valueSet';
+              readonly values: readonly [
+                'NOTICE',
+                'PAYMENT',
+                'CHARGE',
+                'SUGGESTION',
+                'MAINTENANCE',
+                'SYSTEM',
+              ];
+            };
             readonly Occupancy: {
               readonly kind: 'valueSet';
               readonly values: readonly ['OCCUPIED', 'VACANT'];
@@ -1575,9 +2060,33 @@ type ContractBase = Omit<
               readonly kind: 'valueSet';
               readonly values: readonly ['NORMAL', 'IMPORTANT', 'URGENT'];
             };
+            readonly RequestStatus: {
+              readonly kind: 'valueSet';
+              readonly values: readonly ['PENDING', 'IN_PROGRESS', 'COMPLETED', 'REJECTED'];
+            };
             readonly Role: {
               readonly kind: 'valueSet';
               readonly values: readonly ['SUPER_ADMIN', 'MANAGER'];
+            };
+            readonly SuggestionCategory: {
+              readonly kind: 'valueSet';
+              readonly values: readonly [
+                'MAINTENANCE',
+                'SECURITY',
+                'CLEANLINESS',
+                'MANAGEMENT',
+                'OTHER',
+              ];
+            };
+            readonly SuggestionStatus: {
+              readonly kind: 'valueSet';
+              readonly values: readonly [
+                'SUBMITTED',
+                'UNDER_REVIEW',
+                'IN_PROGRESS',
+                'RESOLVED',
+                'CLOSED',
+              ];
             };
             readonly TaskStatus: {
               readonly kind: 'valueSet';
@@ -1610,6 +2119,10 @@ type ContractBase = Omit<
       readonly namespace: 'public' & NamespaceId;
       readonly model: 'FlatResident';
     };
+    readonly MaintenanceRequest: {
+      readonly namespace: 'public' & NamespaceId;
+      readonly model: 'MaintenanceRequest';
+    };
     readonly MaintenanceTask: {
       readonly namespace: 'public' & NamespaceId;
       readonly model: 'MaintenanceTask';
@@ -1623,10 +2136,18 @@ type ContractBase = Omit<
       readonly model: 'MonthlyCharge';
     };
     readonly Notice: { readonly namespace: 'public' & NamespaceId; readonly model: 'Notice' };
+    readonly Notification: {
+      readonly namespace: 'public' & NamespaceId;
+      readonly model: 'Notification';
+    };
     readonly Payment: { readonly namespace: 'public' & NamespaceId; readonly model: 'Payment' };
     readonly PaymentAllocation: {
       readonly namespace: 'public' & NamespaceId;
       readonly model: 'PaymentAllocation';
+    };
+    readonly ResidentSuggestion: {
+      readonly namespace: 'public' & NamespaceId;
+      readonly model: 'ResidentSuggestion';
     };
     readonly Setting: { readonly namespace: 'public' & NamespaceId; readonly model: 'Setting' };
     readonly User: { readonly namespace: 'public' & NamespaceId; readonly model: 'User' };
@@ -2029,6 +2550,14 @@ type ContractBase = Omit<
                 readonly nullable: true;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
               };
+              readonly phone: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly photoUrl: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
             };
             readonly relations: {
               readonly flat: {
@@ -2050,6 +2579,90 @@ type ContractBase = Omit<
                 readonly flatId: { readonly column: 'flatId' };
                 readonly id: { readonly column: 'id' };
                 readonly name: { readonly column: 'name' };
+                readonly phone: { readonly column: 'phone' };
+                readonly photoUrl: { readonly column: 'photoUrl' };
+              };
+            };
+          };
+          readonly MaintenanceRequest: {
+            readonly fields: {
+              readonly adminComment: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly category: {
+                readonly nullable: false;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/enum@1';
+                  readonly typeParams: { readonly typeName: 'MaintenanceCategory' };
+                };
+              };
+              readonly description: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly flatId: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly id: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly photoUrl: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly residentId: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly status: {
+                readonly nullable: false;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/enum@1';
+                  readonly typeParams: { readonly typeName: 'RequestStatus' };
+                };
+              };
+              readonly submittedAt: {
+                readonly nullable: false;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/timestamp-date@1';
+                  readonly typeParams: { readonly precision: 3 };
+                };
+              };
+              readonly title: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly updatedAt: {
+                readonly nullable: false;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/timestamp-date@1';
+                  readonly typeParams: { readonly precision: 3 };
+                };
+              };
+            };
+            readonly relations: Record<string, never>;
+            readonly storage: {
+              readonly table: 'MaintenanceRequest';
+              readonly namespaceId: 'public';
+              readonly fields: {
+                readonly adminComment: { readonly column: 'adminComment' };
+                readonly category: { readonly column: 'category' };
+                readonly description: { readonly column: 'description' };
+                readonly flatId: { readonly column: 'flatId' };
+                readonly id: { readonly column: 'id' };
+                readonly photoUrl: { readonly column: 'photoUrl' };
+                readonly residentId: { readonly column: 'residentId' };
+                readonly status: { readonly column: 'status' };
+                readonly submittedAt: { readonly column: 'submittedAt' };
+                readonly title: { readonly column: 'title' };
+                readonly updatedAt: { readonly column: 'updatedAt' };
               };
             };
           };
@@ -2268,6 +2881,14 @@ type ContractBase = Omit<
                 readonly nullable: false;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
               };
+              readonly category: {
+                readonly nullable: false;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/enum@1';
+                  readonly typeParams: { readonly typeName: 'NoticeCategory' };
+                };
+              };
               readonly createdById: {
                 readonly nullable: false;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
@@ -2283,6 +2904,10 @@ type ContractBase = Omit<
               readonly id: {
                 readonly nullable: false;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly pinned: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/bool@1' };
               };
               readonly priority: {
                 readonly nullable: false;
@@ -2311,12 +2936,77 @@ type ContractBase = Omit<
               readonly namespaceId: 'public';
               readonly fields: {
                 readonly body: { readonly column: 'body' };
+                readonly category: { readonly column: 'category' };
                 readonly createdById: { readonly column: 'createdById' };
                 readonly expiresAt: { readonly column: 'expiresAt' };
                 readonly id: { readonly column: 'id' };
+                readonly pinned: { readonly column: 'pinned' };
                 readonly priority: { readonly column: 'priority' };
                 readonly publishedAt: { readonly column: 'publishedAt' };
                 readonly title: { readonly column: 'title' };
+              };
+            };
+          };
+          readonly Notification: {
+            readonly fields: {
+              readonly body: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly createdAt: {
+                readonly nullable: false;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/timestamp-date@1';
+                  readonly typeParams: { readonly precision: 3 };
+                };
+              };
+              readonly href: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly id: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly readAt: {
+                readonly nullable: true;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/timestamp-date@1';
+                  readonly typeParams: { readonly precision: 3 };
+                };
+              };
+              readonly recipientEmail: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly title: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly type: {
+                readonly nullable: false;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/enum@1';
+                  readonly typeParams: { readonly typeName: 'NotificationType' };
+                };
+              };
+            };
+            readonly relations: Record<string, never>;
+            readonly storage: {
+              readonly table: 'Notification';
+              readonly namespaceId: 'public';
+              readonly fields: {
+                readonly body: { readonly column: 'body' };
+                readonly createdAt: { readonly column: 'createdAt' };
+                readonly href: { readonly column: 'href' };
+                readonly id: { readonly column: 'id' };
+                readonly readAt: { readonly column: 'readAt' };
+                readonly recipientEmail: { readonly column: 'recipientEmail' };
+                readonly title: { readonly column: 'title' };
+                readonly type: { readonly column: 'type' };
               };
             };
           };
@@ -2490,6 +3180,92 @@ type ContractBase = Omit<
                 readonly chargeId: { readonly column: 'chargeId' };
                 readonly id: { readonly column: 'id' };
                 readonly paymentId: { readonly column: 'paymentId' };
+              };
+            };
+          };
+          readonly ResidentSuggestion: {
+            readonly fields: {
+              readonly adminResponse: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly category: {
+                readonly nullable: false;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/enum@1';
+                  readonly typeParams: { readonly typeName: 'SuggestionCategory' };
+                };
+              };
+              readonly description: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly flatId: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly id: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly priority: {
+                readonly nullable: false;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/enum@1';
+                  readonly typeParams: { readonly typeName: 'Priority' };
+                };
+              };
+              readonly residentId: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly status: {
+                readonly nullable: false;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/enum@1';
+                  readonly typeParams: { readonly typeName: 'SuggestionStatus' };
+                };
+              };
+              readonly submittedAt: {
+                readonly nullable: false;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/timestamp-date@1';
+                  readonly typeParams: { readonly precision: 3 };
+                };
+              };
+              readonly title: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly updatedAt: {
+                readonly nullable: false;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/timestamp-date@1';
+                  readonly typeParams: { readonly precision: 3 };
+                };
+              };
+            };
+            readonly relations: Record<string, never>;
+            readonly storage: {
+              readonly table: 'ResidentSuggestion';
+              readonly namespaceId: 'public';
+              readonly fields: {
+                readonly adminResponse: { readonly column: 'adminResponse' };
+                readonly category: { readonly column: 'category' };
+                readonly description: { readonly column: 'description' };
+                readonly flatId: { readonly column: 'flatId' };
+                readonly id: { readonly column: 'id' };
+                readonly priority: { readonly column: 'priority' };
+                readonly residentId: { readonly column: 'residentId' };
+                readonly status: { readonly column: 'status' };
+                readonly submittedAt: { readonly column: 'submittedAt' };
+                readonly title: { readonly column: 'title' };
+                readonly updatedAt: { readonly column: 'updatedAt' };
               };
             };
           };
@@ -2693,6 +3469,43 @@ type ContractBase = Omit<
           };
         },
         {
+          readonly onCreate: { readonly id: 'cuid2'; readonly kind: 'generator' };
+          readonly ref: {
+            readonly entry: 'MaintenanceRequest';
+            readonly field: 'id';
+            readonly namespace: 'public';
+          };
+        },
+        {
+          readonly onCreate: {
+            readonly id: 'timestampNow';
+            readonly kind: 'generator';
+            readonly params: { readonly precision: 3 };
+          };
+          readonly ref: {
+            readonly entry: 'MaintenanceRequest';
+            readonly field: 'submittedAt';
+            readonly namespace: 'public';
+          };
+        },
+        {
+          readonly onCreate: {
+            readonly id: 'timestampNow';
+            readonly kind: 'generator';
+            readonly params: { readonly precision: 3 };
+          };
+          readonly onUpdate: {
+            readonly id: 'timestampNow';
+            readonly kind: 'generator';
+            readonly params: { readonly precision: 3 };
+          };
+          readonly ref: {
+            readonly entry: 'MaintenanceRequest';
+            readonly field: 'updatedAt';
+            readonly namespace: 'public';
+          };
+        },
+        {
           readonly onCreate: {
             readonly id: 'timestampNow';
             readonly kind: 'generator';
@@ -2771,6 +3584,26 @@ type ContractBase = Omit<
             readonly params: { readonly precision: 3 };
           };
           readonly ref: {
+            readonly entry: 'Notification';
+            readonly field: 'createdAt';
+            readonly namespace: 'public';
+          };
+        },
+        {
+          readonly onCreate: { readonly id: 'cuid2'; readonly kind: 'generator' };
+          readonly ref: {
+            readonly entry: 'Notification';
+            readonly field: 'id';
+            readonly namespace: 'public';
+          };
+        },
+        {
+          readonly onCreate: {
+            readonly id: 'timestampNow';
+            readonly kind: 'generator';
+            readonly params: { readonly precision: 3 };
+          };
+          readonly ref: {
             readonly entry: 'Payment';
             readonly field: 'createdAt';
             readonly namespace: 'public';
@@ -2789,6 +3622,43 @@ type ContractBase = Omit<
           readonly ref: {
             readonly entry: 'PaymentAllocation';
             readonly field: 'id';
+            readonly namespace: 'public';
+          };
+        },
+        {
+          readonly onCreate: { readonly id: 'cuid2'; readonly kind: 'generator' };
+          readonly ref: {
+            readonly entry: 'ResidentSuggestion';
+            readonly field: 'id';
+            readonly namespace: 'public';
+          };
+        },
+        {
+          readonly onCreate: {
+            readonly id: 'timestampNow';
+            readonly kind: 'generator';
+            readonly params: { readonly precision: 3 };
+          };
+          readonly ref: {
+            readonly entry: 'ResidentSuggestion';
+            readonly field: 'submittedAt';
+            readonly namespace: 'public';
+          };
+        },
+        {
+          readonly onCreate: {
+            readonly id: 'timestampNow';
+            readonly kind: 'generator';
+            readonly params: { readonly precision: 3 };
+          };
+          readonly onUpdate: {
+            readonly id: 'timestampNow';
+            readonly kind: 'generator';
+            readonly params: { readonly precision: 3 };
+          };
+          readonly ref: {
+            readonly entry: 'ResidentSuggestion';
+            readonly field: 'updatedAt';
             readonly namespace: 'public';
           };
         },

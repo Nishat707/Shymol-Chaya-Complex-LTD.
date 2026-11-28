@@ -1,5 +1,7 @@
 import { db } from "@/lib/db";
+import { requirePermission } from "@/lib/session";
 export default async function Audit() {
+  await requirePermission("audit");
   const rows = await db().orm.public.AuditLog.orderBy((r) => r.at.desc()).limit(200).all();
   return (
     <>
