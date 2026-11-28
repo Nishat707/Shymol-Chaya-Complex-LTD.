@@ -227,18 +227,6 @@ export default class M extends Migration<Start, End> {
         index: 'ResidentSuggestion_status_idx',
         columns: ['status'],
       }),
-      this.enableRowLevelSecurity({
-        schema: 'public',
-        table: 'MaintenanceRequest',
-      }),
-      this.enableRowLevelSecurity({
-        schema: 'public',
-        table: 'Notification',
-      }),
-      this.enableRowLevelSecurity({
-        schema: 'public',
-        table: 'ResidentSuggestion',
-      }),
     ];
   }
 }
