@@ -5,6 +5,7 @@ import { monthOf } from "./dates";
 
 export type PayMethod = "CASH" | "BANK_TRANSFER" | "MOBILE_FINANCIAL_SERVICE" | "OTHER";
 export const PAY_METHODS: PayMethod[] = ["CASH", "BANK_TRANSFER", "MOBILE_FINANCIAL_SERVICE", "OTHER"];
+const takaText = (amount: string) => `৳${Number(amount).toLocaleString("en-US")}`;
 
 export async function recordPayment(i: { flatNumber: string; amount: string; receivedOn: Date; method: PayMethod; reference?: string; notes?: string; actorId: string }) {
   const receivedOn = i.receivedOn.toISOString().slice(0, 10);
@@ -31,6 +32,8 @@ export async function recordPayment(i: { flatNumber: string; amount: string; rec
     });
     await tx.orm.public.PaymentAllocation.createAll(allocs.map(a => ({ paymentId: p.id, chargeId: a.chargeId, amount: a.amount.toString() })));
     await tx.orm.public.AuditLog.create({ actorId: i.actorId, action: "RECORD_PAYMENT", entity: "Payment", entityId: p.id, after: { receiptNo, flat: i.flatNumber, amount: i.amount } });
+    const residents = await tx.orm.public.FlatResident.where({ flatId: flat.id, active: true }).all();
+    for (const resident of residents) await tx.orm.public.Notification.create({ recipientEmail: resident.email, type: "PAYMENT", title: "Service charge payment recorded", body: `${takaText(i.amount)} received for Flat ${i.flatNumber}`, href: "/resident" });
     return p;
   }, { isolationLevel: "Serializable" });
 }

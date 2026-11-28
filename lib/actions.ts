@@ -2,7 +2,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { db } from "./db";
-import { requireStaff } from "./session";
+import { requirePermission, requireResident, requireStaff } from "./session";
 import { PAY_METHODS, recordPayment, voidPayment, type PayMethod } from "./payments";
 import { generateMonth } from "./billing";
 import { monthOfDate } from "./dates";
@@ -31,18 +31,18 @@ const audit = (actorId: string, action: string, entity: string, entityId: string
 
 export async function addPayment(fd: FormData) {
   await run("/admin/payments", async () => {
-    const s = await requireStaff();
+    const s = await requirePermission("payments");
     const p = await recordPayment({ flatNumber: str(fd, "flat"), amount: amount(str(fd, "amount")), receivedOn: new Date(day(str(fd, "date")) + "T00:00:00Z"), method: method(str(fd, "method")), reference: str(fd, "reference") || undefined, notes: str(fd, "notes") || undefined, actorId: s.userId });
     redirect(`/admin/receipt/${p.id}`);
   });
 }
 export async function voidPay(fd: FormData) {
-  await run("/admin/payments", async () => { const s = await requireStaff(); await voidPayment(str(fd, "id"), str(fd, "reason"), s.userId); });
+  await run("/admin/payments", async () => { const s = await requirePermission("payments"); await voidPayment(str(fd, "id"), str(fd, "reason"), s.userId); });
 }
 
 export async function addExpense(fd: FormData) {
   await run("/admin/expenses", async () => {
-    const s = await requireStaff(); const d = day(str(fd, "date")); await assertOpen(d);
+    const s = await requirePermission("expenses"); const d = day(str(fd, "date")); await assertOpen(d);
     if (!str(fd, "title")) throw new Error("Enter a title.");
     const category = await db().orm.public.ExpenseCategory.firstOrThrow({ id: str(fd, "category") });
     if (!category.active) throw new Error("Choose an active expense category.");
@@ -53,7 +53,7 @@ export async function addExpense(fd: FormData) {
 }
 export async function addExpenseCategory(fd: FormData) {
   await run("/admin/expenses", async () => {
-    const s = await requireStaff();
+    const s = await requirePermission("expenses");
     const name = str(fd, "name");
     if (!name || name.length > 60) throw new Error("Enter a category name up to 60 characters.");
     const categories = await db().orm.public.ExpenseCategory.all();
@@ -70,7 +70,7 @@ export async function addExpenseCategory(fd: FormData) {
 }
 export async function setupDefaultExpenseCategories() {
   await run("/admin/expenses", async () => {
-    const s = await requireStaff();
+    const s = await requirePermission("expenses");
     const categories = await db().orm.public.ExpenseCategory.all();
     for (const name of DEFAULT_EXPENSE_CATEGORIES) {
       const existing = categories.find((category) => category.name.toLowerCase() === name.toLowerCase());
@@ -87,7 +87,7 @@ export async function setupDefaultExpenseCategories() {
 }
 export async function toggleExpenseCategory(fd: FormData) {
   await run("/admin/expenses", async () => {
-    const s = await requireStaff();
+    const s = await requirePermission("expenses");
     const category = await db().orm.public.ExpenseCategory.firstOrThrow({ id: str(fd, "id") });
     await db().orm.public.ExpenseCategory.where({ id: category.id }).update({ active: !category.active });
     await audit(
@@ -102,7 +102,7 @@ export async function toggleExpenseCategory(fd: FormData) {
 }
 export async function payExpense(fd: FormData) {
   await run("/admin/expenses", async () => {
-    const s = await requireStaff(); const e = await db().orm.public.Expense.firstOrThrow({ id: str(fd, "id") });
+    const s = await requirePermission("expenses"); const e = await db().orm.public.Expense.firstOrThrow({ id: str(fd, "id") });
     if (e.status !== "RECORDED") throw new Error("Only unpaid expenses can be marked paid.");
     const d = day(str(fd, "date")); await assertOpen(d);
     await db().orm.public.Expense.where({ id: e.id }).update({ status: "PAID", paidOn: d, method: method(str(fd, "method")) });
@@ -111,7 +111,7 @@ export async function payExpense(fd: FormData) {
 }
 export async function voidExpense(fd: FormData) {
   await run("/admin/expenses", async () => {
-    const s = await requireStaff(); const reason = str(fd, "reason"); if (!reason) throw new Error("A reason is required.");
+    const s = await requirePermission("expenses"); const reason = str(fd, "reason"); if (!reason) throw new Error("A reason is required.");
     const e = await db().orm.public.Expense.firstOrThrow({ id: str(fd, "id") });
     if (e.status === "VOID") throw new Error("Already voided."); await assertOpen(e.expenseDate);
     await db().orm.public.Expense.where({ id: e.id }).update({ status: "VOID", voidReason: reason });
@@ -122,7 +122,7 @@ export async function voidExpense(fd: FormData) {
 export async function saveFlat(fd: FormData) {
   const n = str(fd, "number");
   await run(`/admin/flats/${n}`, async () => {
-    const s = await requireStaff(); const f = await db().orm.public.Flat.firstOrThrow({ number: n });
+    const s = await requirePermission("flats"); const f = await db().orm.public.Flat.firstOrThrow({ number: n });
     const cc = str(fd, "customCharge");
     const data = { ownerName: str(fd, "ownerName") || null, tenantName: str(fd, "tenantName") || null, phone: str(fd, "phone") || null, occupancy: str(fd, "occupancy") === "VACANT" ? "VACANT" as const : "OCCUPIED" as const, customCharge: cc ? amount(cc) : null };
     await db().orm.public.Flat.where({ id: f.id }).update(data);
@@ -132,7 +132,7 @@ export async function saveFlat(fd: FormData) {
 export async function addResident(fd: FormData) {
   const n = str(fd, "number");
   await run(`/admin/flats/${n}`, async () => {
-    const s = await requireStaff(); const f = await db().orm.public.Flat.firstOrThrow({ number: n });
+    const s = await requirePermission("residents"); const f = await db().orm.public.Flat.firstOrThrow({ number: n });
     const r = await db().orm.public.FlatResident.create({ flatId: f.id, email: email(str(fd, "email")), name: str(fd, "name") || null });
     await audit(s.userId, "ADD_RESIDENT", "FlatResident", r.id, null, { flat: n, email: r.email });
   });
@@ -140,7 +140,7 @@ export async function addResident(fd: FormData) {
 export async function toggleResident(fd: FormData) {
   const n = str(fd, "number");
   await run(`/admin/flats/${n}`, async () => {
-    const s = await requireStaff(); const r = await db().orm.public.FlatResident.firstOrThrow({ id: str(fd, "id") });
+    const s = await requirePermission("residents"); const r = await db().orm.public.FlatResident.firstOrThrow({ id: str(fd, "id") });
     await db().orm.public.FlatResident.where({ id: r.id }).update({ active: !r.active });
     await audit(s.userId, r.active ? "DEACTIVATE_RESIDENT" : "ACTIVATE_RESIDENT", "FlatResident", r.id, { active: r.active }, { active: !r.active });
   });
@@ -148,15 +148,18 @@ export async function toggleResident(fd: FormData) {
 
 export async function addNotice(fd: FormData) {
   await run("/admin/notices", async () => {
-    const s = await requireStaff(); if (!str(fd, "title") || !str(fd, "body")) throw new Error("Enter a title and message.");
+    const s = await requirePermission("notices"); if (!str(fd, "title") || !str(fd, "body")) throw new Error("Enter a title and message.");
     const pr = str(fd, "priority"); const exp = str(fd, "expires");
-    const n = await db().orm.public.Notice.create({ title: str(fd, "title"), body: str(fd, "body"), priority: pr === "URGENT" ? "URGENT" : pr === "IMPORTANT" ? "IMPORTANT" : "NORMAL", expiresAt: exp ? new Date(day(exp) + "T00:00:00Z") : null, createdById: s.userId });
+    const category = ["GENERAL","MAINTENANCE","EMERGENCY","PAYMENT_REMINDER"].includes(str(fd, "category")) ? str(fd, "category") as "GENERAL"|"MAINTENANCE"|"EMERGENCY"|"PAYMENT_REMINDER" : "GENERAL";
+    const n = await db().orm.public.Notice.create({ title: str(fd, "title"), body: str(fd, "body"), priority: pr === "URGENT" ? "URGENT" : pr === "IMPORTANT" ? "IMPORTANT" : "NORMAL", category, pinned: str(fd, "pinned") === "1", expiresAt: exp ? new Date(day(exp) + "T00:00:00Z") : null, createdById: s.userId });
     await audit(s.userId, "ADD_NOTICE", "Notice", n.id, null, { title: n.title });
+    const residents = await db().orm.public.FlatResident.where({ active: true }).all();
+    for (const resident of residents) await db().orm.public.Notification.create({ recipientEmail: resident.email, type: "NOTICE", title: "New apartment notice", body: n.title, href: "/resident/notices" });
   });
 }
 
 export async function generateBills(fd: FormData) {
-  await run("/admin/settings", async () => { const s = await requireStaff(); await generateMonth(month(str(fd, "month")), s.userId); });
+  await run("/admin/settings", async () => { const s = await requirePermission("settings"); await generateMonth(month(str(fd, "month")), s.userId); });
 }
 export async function setDefaultCharge(fd: FormData) {
   await run("/admin/settings", async () => {
@@ -202,5 +205,117 @@ export async function toggleManager(fd: FormData) {
     const s = await superAdmin(); const u = await db().orm.public.User.firstOrThrow({ id: str(fd, "id") });
     if (u.role !== "MANAGER") throw new Error("Only manager accounts can be changed here.");
     await db().orm.public.User.where({ id: u.id }).update({ active: !u.active }); await audit(s.userId, "TOGGLE_MANAGER", "User", u.id, { active: u.active }, { active: !u.active });
+  });
+}
+
+export async function editNotice(fd: FormData) {
+  await run("/admin/notices", async () => {
+    const s = await requirePermission("notices");
+    const id = str(fd, "id");
+    const before = await db().orm.public.Notice.firstOrThrow({ id });
+    const title = str(fd, "title"), body = str(fd, "body");
+    if (!title || !body) throw new Error("Enter a title and message.");
+    const pr = str(fd, "priority");
+    const exp = str(fd, "expires");
+    const category = ["GENERAL","MAINTENANCE","EMERGENCY","PAYMENT_REMINDER"].includes(str(fd, "category")) ? str(fd, "category") as "GENERAL"|"MAINTENANCE"|"EMERGENCY"|"PAYMENT_REMINDER" : "GENERAL";
+    await db().orm.public.Notice.where({ id }).update({ title, body, category, priority: pr === "URGENT" ? "URGENT" : pr === "IMPORTANT" ? "IMPORTANT" : "NORMAL", pinned: str(fd, "pinned") === "1", expiresAt: exp ? new Date(day(exp)+"T00:00:00Z") : null });
+    await audit(s.userId, "EDIT_NOTICE", "Notice", id, before, { title, body, category, pinned: str(fd, "pinned") === "1" });
+  });
+}
+
+export async function deleteNotice(fd: FormData) {
+  await run("/admin/notices", async () => {
+    const s = await requirePermission("notices");
+    const n = await db().orm.public.Notice.firstOrThrow({ id: str(fd, "id") });
+    await db().orm.public.Notice.where({ id: n.id }).delete();
+    await audit(s.userId, "DELETE_NOTICE", "Notice", n.id, { title: n.title }, null);
+  });
+}
+
+export async function submitSuggestion(fd: FormData) {
+  await run("/resident/suggestions", async () => {
+    const s = await requireResident();
+    const resident = await db().orm.public.FlatResident.firstOrThrow({ email: s.email, active: true });
+    if (!s.flatIds.includes(resident.flatId)) throw new Error("Resident flat access was not found.");
+    const title = str(fd, "title"), description = str(fd, "description");
+    if (!title || !description) throw new Error("Enter a title and description.");
+    const category = ["MAINTENANCE","SECURITY","CLEANLINESS","MANAGEMENT","OTHER"].includes(str(fd, "category")) ? str(fd, "category") as "MAINTENANCE"|"SECURITY"|"CLEANLINESS"|"MANAGEMENT"|"OTHER" : "OTHER";
+    const suggestion = await db().orm.public.ResidentSuggestion.create({ flatId: resident.flatId, residentId: resident.id, title, description, category, priority: str(fd, "priority") === "URGENT" ? "URGENT" : str(fd, "priority") === "IMPORTANT" ? "IMPORTANT" : "NORMAL" });
+    for (const staff of await db().orm.public.User.where({ active: true }).all()) {
+      await db().orm.public.Notification.create({ recipientEmail: staff.email, type: "SUGGESTION", title: "New resident suggestion", body: suggestion.title, href: "/admin/suggestions" });
+    }
+  });
+}
+
+export async function respondSuggestion(fd: FormData) {
+  await run("/admin/suggestions", async () => {
+    const s = await requirePermission("suggestions");
+    const suggestion = await db().orm.public.ResidentSuggestion.firstOrThrow({ id: str(fd, "id") });
+    const status = ["SUBMITTED","UNDER_REVIEW","IN_PROGRESS","RESOLVED","CLOSED"].includes(str(fd, "status")) ? str(fd, "status") as "SUBMITTED"|"UNDER_REVIEW"|"IN_PROGRESS"|"RESOLVED"|"CLOSED" : "UNDER_REVIEW";
+    const response = str(fd, "response") || null;
+    await db().orm.public.ResidentSuggestion.where({ id: suggestion.id }).update({ status, adminResponse: response });
+    await audit(s.userId, "UPDATE_SUGGESTION_STATUS", "ResidentSuggestion", suggestion.id, { status: suggestion.status, adminResponse: suggestion.adminResponse }, { status, adminResponse: response });
+    const resident = await db().orm.public.FlatResident.first({ id: suggestion.residentId });
+    if (resident) await db().orm.public.Notification.create({ recipientEmail: resident.email, type: "SUGGESTION", title: "Suggestion updated", body: suggestion.title, href: "/resident/suggestions" });
+  });
+}
+
+export async function submitMaintenance(fd: FormData) {
+  await run("/resident/maintenance", async () => {
+    const s = await requireResident();
+    const resident = await db().orm.public.FlatResident.firstOrThrow({ email: s.email, active: true });
+    if (!s.flatIds.includes(resident.flatId)) throw new Error("Resident flat access was not found.");
+    const title = str(fd, "title"), description = str(fd, "description");
+    if (!title || !description) throw new Error("Enter a title and description.");
+    const category = ["PLUMBING","ELECTRICAL","ELEVATOR","CLEANING","SECURITY","COMMON_AREA","OTHER"].includes(str(fd, "category")) ? str(fd, "category") as "PLUMBING"|"ELECTRICAL"|"ELEVATOR"|"CLEANING"|"SECURITY"|"COMMON_AREA"|"OTHER" : "OTHER";
+    await db().orm.public.MaintenanceRequest.create({ flatId: resident.flatId, residentId: resident.id, title, description, category, photoUrl: str(fd, "photoUrl") || null });
+  });
+}
+
+export async function updateMaintenance(fd: FormData) {
+  await run("/admin/maintenance", async () => {
+    const s = await requirePermission("maintenance");
+    const request = await db().orm.public.MaintenanceRequest.firstOrThrow({ id: str(fd, "id") });
+    const status = ["PENDING","IN_PROGRESS","COMPLETED","REJECTED"].includes(str(fd, "status")) ? str(fd, "status") as "PENDING"|"IN_PROGRESS"|"COMPLETED"|"REJECTED" : "PENDING";
+    const comment = str(fd, "comment") || null;
+    await db().orm.public.MaintenanceRequest.where({ id: request.id }).update({ status, adminComment: comment });
+    await audit(s.userId, "UPDATE_MAINTENANCE_STATUS", "MaintenanceRequest", request.id, { status: request.status, adminComment: request.adminComment }, { status, adminComment: comment });
+    const resident = await db().orm.public.FlatResident.first({ id: request.residentId });
+    if (resident) await db().orm.public.Notification.create({ recipientEmail: resident.email, type: "MAINTENANCE", title: "Maintenance request updated", body: request.title, href: "/resident/maintenance" });
+  });
+}
+
+export async function updateResidentProfile(fd: FormData) {
+  await run("/resident/profile", async () => {
+    const s = await requireResident();
+    const resident = await db().orm.public.FlatResident.firstOrThrow({ email: s.email, active: true });
+    const name = str(fd, "name"), phone = str(fd, "phone");
+    await db().orm.public.FlatResident.where({ id: resident.id }).update({ name: name || null, phone: phone || null });
+  });
+}
+
+export async function markNotificationsRead(fd: FormData) {
+  await run("/resident/notifications", async () => {
+    const s = await requireResident();
+    const id = str(fd, "id");
+    if (id) {
+      const notification = await db().orm.public.Notification.firstOrThrow({ id });
+      if (notification.recipientEmail !== s.email) throw new Error("Unauthorized notification.");
+      await db().orm.public.Notification.where({ id }).update({ readAt: new Date() });
+    } else {
+      const unread = await db().orm.public.Notification.where({ recipientEmail: s.email }).all();
+      for (const notification of unread) if (!notification.readAt) await db().orm.public.Notification.where({ id: notification.id }).update({ readAt: new Date() });
+    }
+  });
+}
+
+export async function saveManagerPermissions(fd: FormData) {
+  await run("/admin/settings", async () => {
+    await superAdmin();
+    const id = str(fd, "id");
+    const keys = ["payments","expenses","flats","notices","residents","reports","suggestions","maintenance","audit","settings"];
+    const permissions: Record<string, boolean> = {};
+    for (const key of keys) permissions[key] = str(fd, key) === "1";
+    await db().orm.public.User.where({ id }).update({ permissions });
   });
 }

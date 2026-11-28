@@ -17,6 +17,6 @@ CREATE TRIGGER no_delete_audit BEFORE DELETE ON "AuditLog" FOR EACH ROW EXECUTE 
 -- Block direct browser access with the public anon key (no policies = no access).
 -- The server connects as the database owner through Prisma, which bypasses RLS.
 DO $$ DECLARE t text; BEGIN
-  FOREACH t IN ARRAY ARRAY['User','Flat','FlatResident','ChargeSetting','MonthlyCharge','Payment','PaymentAllocation','ExpenseCategory','Expense','MaintenanceTask','Notice','MonthClose','Counter','Setting','AuditLog']
+  FOREACH t IN ARRAY ARRAY['User','Flat','FlatResident','ChargeSetting','MonthlyCharge','Payment','PaymentAllocation','ExpenseCategory','Expense','MaintenanceTask','Notice','MonthClose','Counter','Setting','AuditLog','ResidentSuggestion','MaintenanceRequest','Notification']
   LOOP EXECUTE format('ALTER TABLE %I ENABLE ROW LEVEL SECURITY', t); END LOOP;
 END $$;

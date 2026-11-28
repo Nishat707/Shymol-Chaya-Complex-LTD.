@@ -1,8 +1,10 @@
 import Link from "next/link";
 import { db } from "@/lib/db";
 import { taka } from "@/lib/dates";
+import { requirePermission } from "@/lib/session";
 
 export default async function Flats() {
+  await requirePermission("flats");
   const flats = await db().orm.public.Flat
     .orderBy((f) => f.floor.asc()).orderBy((f) => f.number.asc())
     .include("residents", (r) => r.where({ active: true }))

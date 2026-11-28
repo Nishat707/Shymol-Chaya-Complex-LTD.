@@ -57,6 +57,17 @@ following "First run" below.
 10. Settings > "Generate monthly bills" for each month you want billed. Then Flats > open a flat > add the resident's email.
     Create a confirmed Supabase Auth user with the same email so the resident can sign in.
 
+## Additional features migration
+After updating the application, apply [prisma/additional-features.sql](prisma/additional-features.sql) to the
+PostgreSQL database, then rerun [prisma/constraints.sql](prisma/constraints.sql). The SQL adds resident
+suggestions, maintenance requests, notifications, notice categories/pinning, and resident profile fields.
+Apply the SQL only once against a deployment database:
+
+```bash
+psql "$DIRECT_URL" -f prisma/additional-features.sql
+psql "$DIRECT_URL" -f prisma/constraints.sql
+```
+
 ## Deploy to Vercel using the existing Prisma Postgres database
 1. Import the private GitHub repository into Vercel and select Next.js.
 2. Set these Vercel environment variables:

@@ -3,9 +3,11 @@ import { taka } from "@/lib/dates";
 import { addExpense, addExpenseCategory, payExpense, setupDefaultExpenseCategories, toggleExpenseCategory, voidExpense } from "@/lib/actions";
 import { Msg } from "@/components/Msg";
 import { DEFAULT_EXPENSE_CATEGORIES } from "@/lib/expense-categories";
+import { requirePermission } from "@/lib/session";
 
 const METHODS = [["CASH", "Cash"], ["BANK_TRANSFER", "Bank transfer"], ["MOBILE_FINANCIAL_SERVICE", "Mobile financial service"], ["OTHER", "Other"]];
 export default async function Expenses({ searchParams }: { searchParams: Promise<{ err?: string; ok?: string }> }) {
+  await requirePermission("expenses");
   const sp = await searchParams; const today = new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Dhaka" });
   const d = db();
   const [cats, allCats, list] = await Promise.all([
