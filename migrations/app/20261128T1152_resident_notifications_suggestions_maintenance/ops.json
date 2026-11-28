@@ -1,0 +1,1041 @@
+[
+  {
+    "id": "createNativeEnumType.MaintenanceCategory",
+    "label": "Create enum type \"MaintenanceCategory\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "type",
+        "name": "MaintenanceCategory"
+      }
+    },
+    "precheck": [],
+    "execute": [
+      {
+        "description": "create enum type \"MaintenanceCategory\"",
+        "sql": "CREATE TYPE \"public\".\"MaintenanceCategory\" AS ENUM ('PLUMBING', 'ELECTRICAL', 'ELEVATOR', 'CLEANING', 'SECURITY', 'COMMON_AREA', 'OTHER')",
+        "params": []
+      }
+    ],
+    "postcheck": []
+  },
+  {
+    "id": "createNativeEnumType.NoticeCategory",
+    "label": "Create enum type \"NoticeCategory\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "type",
+        "name": "NoticeCategory"
+      }
+    },
+    "precheck": [],
+    "execute": [
+      {
+        "description": "create enum type \"NoticeCategory\"",
+        "sql": "CREATE TYPE \"public\".\"NoticeCategory\" AS ENUM ('GENERAL', 'MAINTENANCE', 'EMERGENCY', 'PAYMENT_REMINDER')",
+        "params": []
+      }
+    ],
+    "postcheck": []
+  },
+  {
+    "id": "createNativeEnumType.NotificationType",
+    "label": "Create enum type \"NotificationType\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "type",
+        "name": "NotificationType"
+      }
+    },
+    "precheck": [],
+    "execute": [
+      {
+        "description": "create enum type \"NotificationType\"",
+        "sql": "CREATE TYPE \"public\".\"NotificationType\" AS ENUM ('NOTICE', 'PAYMENT', 'CHARGE', 'SUGGESTION', 'MAINTENANCE', 'SYSTEM')",
+        "params": []
+      }
+    ],
+    "postcheck": []
+  },
+  {
+    "id": "createNativeEnumType.RequestStatus",
+    "label": "Create enum type \"RequestStatus\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "type",
+        "name": "RequestStatus"
+      }
+    },
+    "precheck": [],
+    "execute": [
+      {
+        "description": "create enum type \"RequestStatus\"",
+        "sql": "CREATE TYPE \"public\".\"RequestStatus\" AS ENUM ('PENDING', 'IN_PROGRESS', 'COMPLETED', 'REJECTED')",
+        "params": []
+      }
+    ],
+    "postcheck": []
+  },
+  {
+    "id": "createNativeEnumType.SuggestionCategory",
+    "label": "Create enum type \"SuggestionCategory\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "type",
+        "name": "SuggestionCategory"
+      }
+    },
+    "precheck": [],
+    "execute": [
+      {
+        "description": "create enum type \"SuggestionCategory\"",
+        "sql": "CREATE TYPE \"public\".\"SuggestionCategory\" AS ENUM ('MAINTENANCE', 'SECURITY', 'CLEANLINESS', 'MANAGEMENT', 'OTHER')",
+        "params": []
+      }
+    ],
+    "postcheck": []
+  },
+  {
+    "id": "createNativeEnumType.SuggestionStatus",
+    "label": "Create enum type \"SuggestionStatus\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "type",
+        "name": "SuggestionStatus"
+      }
+    },
+    "precheck": [],
+    "execute": [
+      {
+        "description": "create enum type \"SuggestionStatus\"",
+        "sql": "CREATE TYPE \"public\".\"SuggestionStatus\" AS ENUM ('SUBMITTED', 'UNDER_REVIEW', 'IN_PROGRESS', 'RESOLVED', 'CLOSED')",
+        "params": []
+      }
+    ],
+    "postcheck": []
+  },
+  {
+    "id": "table.MaintenanceRequest",
+    "label": "Create table \"MaintenanceRequest\"",
+    "summary": "Creates table \"MaintenanceRequest\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "MaintenanceRequest"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"MaintenanceRequest\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"MaintenanceRequest\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "table \"MaintenanceRequest\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"MaintenanceRequest\"",
+        "sql": "CREATE TABLE \"public\".\"MaintenanceRequest\" (\n  \"adminComment\" text,\n  \"category\" \"MaintenanceCategory\" DEFAULT 'OTHER'::\"MaintenanceCategory\" NOT NULL,\n  \"description\" text NOT NULL,\n  \"flatId\" text NOT NULL,\n  \"id\" text NOT NULL,\n  \"photoUrl\" text,\n  \"residentId\" text NOT NULL,\n  \"status\" \"RequestStatus\" DEFAULT 'PENDING'::\"RequestStatus\" NOT NULL,\n  \"submittedAt\" timestamp(3) DEFAULT (now()) NOT NULL,\n  \"title\" text NOT NULL,\n  \"updatedAt\" timestamp(3) NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"MaintenanceRequest\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3))) AS \"result\"",
+        "params": [
+          "\"public\".\"MaintenanceRequest\"",
+          "r",
+          "p"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "table \"MaintenanceRequest\""
+        }
+      }
+    ]
+  },
+  {
+    "id": "table.Notification",
+    "label": "Create table \"Notification\"",
+    "summary": "Creates table \"Notification\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "Notification"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"Notification\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Notification\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "table \"Notification\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"Notification\"",
+        "sql": "CREATE TABLE \"public\".\"Notification\" (\n  \"body\" text NOT NULL,\n  \"createdAt\" timestamp(3) DEFAULT (now()) NOT NULL,\n  \"href\" text,\n  \"id\" text NOT NULL,\n  \"readAt\" timestamp(3),\n  \"recipientEmail\" text NOT NULL,\n  \"title\" text NOT NULL,\n  \"type\" \"NotificationType\" NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"Notification\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3))) AS \"result\"",
+        "params": [
+          "\"public\".\"Notification\"",
+          "r",
+          "p"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "table \"Notification\""
+        }
+      }
+    ]
+  },
+  {
+    "id": "table.ResidentSuggestion",
+    "label": "Create table \"ResidentSuggestion\"",
+    "summary": "Creates table \"ResidentSuggestion\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "ResidentSuggestion"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"ResidentSuggestion\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"ResidentSuggestion\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "table \"ResidentSuggestion\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"ResidentSuggestion\"",
+        "sql": "CREATE TABLE \"public\".\"ResidentSuggestion\" (\n  \"adminResponse\" text,\n  \"category\" \"SuggestionCategory\" DEFAULT 'OTHER'::\"SuggestionCategory\" NOT NULL,\n  \"description\" text NOT NULL,\n  \"flatId\" text NOT NULL,\n  \"id\" text NOT NULL,\n  \"priority\" \"Priority\" DEFAULT 'NORMAL'::\"Priority\" NOT NULL,\n  \"residentId\" text NOT NULL,\n  \"status\" \"SuggestionStatus\" DEFAULT 'SUBMITTED'::\"SuggestionStatus\" NOT NULL,\n  \"submittedAt\" timestamp(3) DEFAULT (now()) NOT NULL,\n  \"title\" text NOT NULL,\n  \"updatedAt\" timestamp(3) NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"ResidentSuggestion\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3))) AS \"result\"",
+        "params": [
+          "\"public\".\"ResidentSuggestion\"",
+          "r",
+          "p"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "table \"ResidentSuggestion\""
+        }
+      }
+    ]
+  },
+  {
+    "id": "column.public.FlatResident.phone",
+    "label": "Add column \"phone\" to \"FlatResident\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "phone",
+        "table": "FlatResident"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"phone\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "FlatResident",
+          "phone"
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "column \"phone\" on \"FlatResident\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"phone\"",
+        "sql": "ALTER TABLE \"public\".\"FlatResident\" ADD COLUMN \"phone\" text"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"phone\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "FlatResident",
+          "phone"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "column \"phone\" on \"FlatResident\""
+        }
+      },
+      {
+        "description": "verify column \"phone\" has type \"text\"",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_attribute\" AS \"a\" INNER JOIN \"pg_class\" AS \"c\" ON \"c\".\"oid\" = \"a\".\"attrelid\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"relnamespace\" WHERE (\"n\".\"nspname\" = $1 AND \"c\".\"relname\" = $2 AND \"a\".\"attname\" = $3 AND (format_type(\"a\".\"atttypid\", \"a\".\"atttypmod\")) = $4 AND NOT (\"a\".\"attisdropped\"))) AS \"result\"",
+        "params": [
+          "public",
+          "FlatResident",
+          "phone",
+          "text"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.FlatResident.photoUrl",
+    "label": "Add column \"photoUrl\" to \"FlatResident\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "photoUrl",
+        "table": "FlatResident"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"photoUrl\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "FlatResident",
+          "photoUrl"
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "column \"photoUrl\" on \"FlatResident\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"photoUrl\"",
+        "sql": "ALTER TABLE \"public\".\"FlatResident\" ADD COLUMN \"photoUrl\" text"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"photoUrl\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "FlatResident",
+          "photoUrl"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "column \"photoUrl\" on \"FlatResident\""
+        }
+      },
+      {
+        "description": "verify column \"photoUrl\" has type \"text\"",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_attribute\" AS \"a\" INNER JOIN \"pg_class\" AS \"c\" ON \"c\".\"oid\" = \"a\".\"attrelid\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"relnamespace\" WHERE (\"n\".\"nspname\" = $1 AND \"c\".\"relname\" = $2 AND \"a\".\"attname\" = $3 AND (format_type(\"a\".\"atttypid\", \"a\".\"atttypmod\")) = $4 AND NOT (\"a\".\"attisdropped\"))) AS \"result\"",
+        "params": [
+          "public",
+          "FlatResident",
+          "photoUrl",
+          "text"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.Notice.category",
+    "label": "Add column \"category\" to \"Notice\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "category",
+        "table": "Notice"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"category\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "Notice",
+          "category"
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "column \"category\" on \"Notice\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"category\"",
+        "sql": "ALTER TABLE \"public\".\"Notice\" ADD COLUMN \"category\" \"NoticeCategory\" DEFAULT 'GENERAL'::\"NoticeCategory\" NOT NULL"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"category\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "Notice",
+          "category"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "column \"category\" on \"Notice\""
+        }
+      },
+      {
+        "description": "verify column \"category\" has type \"NoticeCategory\"",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_attribute\" AS \"a\" WHERE (\"a\".\"attrelid\" = to_regclass($1) AND \"a\".\"attname\" = $2 AND \"a\".\"atttypid\" = to_regtype($3) AND NOT (\"a\".\"attisdropped\"))) AS \"result\"",
+        "params": [
+          "\"public\".\"Notice\"",
+          "category",
+          "\"NoticeCategory\""
+        ]
+      },
+      {
+        "description": "verify column \"category\" is NOT NULL",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3 AND \"is_nullable\" = $4)) AS \"result\"",
+        "params": [
+          "public",
+          "Notice",
+          "category",
+          "NO"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.Notice.pinned",
+    "label": "Add column \"pinned\" to \"Notice\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "pinned",
+        "table": "Notice"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"pinned\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "Notice",
+          "pinned"
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "column \"pinned\" on \"Notice\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"pinned\"",
+        "sql": "ALTER TABLE \"public\".\"Notice\" ADD COLUMN \"pinned\" bool DEFAULT false NOT NULL"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"pinned\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "Notice",
+          "pinned"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "column \"pinned\" on \"Notice\""
+        }
+      },
+      {
+        "description": "verify column \"pinned\" has type \"boolean\"",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_attribute\" AS \"a\" INNER JOIN \"pg_class\" AS \"c\" ON \"c\".\"oid\" = \"a\".\"attrelid\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"relnamespace\" WHERE (\"n\".\"nspname\" = $1 AND \"c\".\"relname\" = $2 AND \"a\".\"attname\" = $3 AND (format_type(\"a\".\"atttypid\", \"a\".\"atttypmod\")) = $4 AND NOT (\"a\".\"attisdropped\"))) AS \"result\"",
+        "params": [
+          "public",
+          "Notice",
+          "pinned",
+          "boolean"
+        ]
+      },
+      {
+        "description": "verify column \"pinned\" is NOT NULL",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3 AND \"is_nullable\" = $4)) AS \"result\"",
+        "params": [
+          "public",
+          "Notice",
+          "pinned",
+          "NO"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.MaintenanceRequest.MaintenanceRequest_flatId_idx",
+    "label": "Create index \"MaintenanceRequest_flatId_idx\" on \"MaintenanceRequest\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "MaintenanceRequest_flatId_idx",
+        "table": "MaintenanceRequest"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"MaintenanceRequest_flatId_idx\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"MaintenanceRequest_flatId_idx\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "index \"MaintenanceRequest_flatId_idx\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"MaintenanceRequest_flatId_idx\"",
+        "sql": "CREATE INDEX \"MaintenanceRequest_flatId_idx\" ON \"public\".\"MaintenanceRequest\" (\"flatId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"MaintenanceRequest_flatId_idx\" exists on \"MaintenanceRequest\" with the planned definition",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" INNER JOIN \"pg_index\" AS \"i\" ON \"i\".\"indexrelid\" = \"c\".\"oid\" INNER JOIN \"pg_am\" AS \"m\" ON \"m\".\"oid\" = \"c\".\"relam\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3) AND \"i\".\"indrelid\" = to_regclass($4) AND NOT (\"i\".\"indisunique\") AND \"m\".\"amname\" = $5 AND (\"i\".\"indexprs\" IS NULL AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"i\".\"indkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"i\".\"indrelid\" AND key_attribute.attnum = key_column.attnum) = ($6)::jsonb) AND \"i\".\"indpred\" IS NULL)) AS \"result\"",
+        "params": [
+          "\"public\".\"MaintenanceRequest_flatId_idx\"",
+          "i",
+          "I",
+          "\"public\".\"MaintenanceRequest\"",
+          "btree",
+          "[\"flatId\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.MaintenanceRequest.MaintenanceRequest_residentId_idx",
+    "label": "Create index \"MaintenanceRequest_residentId_idx\" on \"MaintenanceRequest\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "MaintenanceRequest_residentId_idx",
+        "table": "MaintenanceRequest"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"MaintenanceRequest_residentId_idx\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"MaintenanceRequest_residentId_idx\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "index \"MaintenanceRequest_residentId_idx\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"MaintenanceRequest_residentId_idx\"",
+        "sql": "CREATE INDEX \"MaintenanceRequest_residentId_idx\" ON \"public\".\"MaintenanceRequest\" (\"residentId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"MaintenanceRequest_residentId_idx\" exists on \"MaintenanceRequest\" with the planned definition",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" INNER JOIN \"pg_index\" AS \"i\" ON \"i\".\"indexrelid\" = \"c\".\"oid\" INNER JOIN \"pg_am\" AS \"m\" ON \"m\".\"oid\" = \"c\".\"relam\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3) AND \"i\".\"indrelid\" = to_regclass($4) AND NOT (\"i\".\"indisunique\") AND \"m\".\"amname\" = $5 AND (\"i\".\"indexprs\" IS NULL AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"i\".\"indkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"i\".\"indrelid\" AND key_attribute.attnum = key_column.attnum) = ($6)::jsonb) AND \"i\".\"indpred\" IS NULL)) AS \"result\"",
+        "params": [
+          "\"public\".\"MaintenanceRequest_residentId_idx\"",
+          "i",
+          "I",
+          "\"public\".\"MaintenanceRequest\"",
+          "btree",
+          "[\"residentId\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.MaintenanceRequest.MaintenanceRequest_status_idx",
+    "label": "Create index \"MaintenanceRequest_status_idx\" on \"MaintenanceRequest\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "MaintenanceRequest_status_idx",
+        "table": "MaintenanceRequest"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"MaintenanceRequest_status_idx\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"MaintenanceRequest_status_idx\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "index \"MaintenanceRequest_status_idx\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"MaintenanceRequest_status_idx\"",
+        "sql": "CREATE INDEX \"MaintenanceRequest_status_idx\" ON \"public\".\"MaintenanceRequest\" (\"status\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"MaintenanceRequest_status_idx\" exists on \"MaintenanceRequest\" with the planned definition",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" INNER JOIN \"pg_index\" AS \"i\" ON \"i\".\"indexrelid\" = \"c\".\"oid\" INNER JOIN \"pg_am\" AS \"m\" ON \"m\".\"oid\" = \"c\".\"relam\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3) AND \"i\".\"indrelid\" = to_regclass($4) AND NOT (\"i\".\"indisunique\") AND \"m\".\"amname\" = $5 AND (\"i\".\"indexprs\" IS NULL AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"i\".\"indkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"i\".\"indrelid\" AND key_attribute.attnum = key_column.attnum) = ($6)::jsonb) AND \"i\".\"indpred\" IS NULL)) AS \"result\"",
+        "params": [
+          "\"public\".\"MaintenanceRequest_status_idx\"",
+          "i",
+          "I",
+          "\"public\".\"MaintenanceRequest\"",
+          "btree",
+          "[\"status\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.Notification.Notification_recipientEmail_idx",
+    "label": "Create index \"Notification_recipientEmail_idx\" on \"Notification\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "Notification_recipientEmail_idx",
+        "table": "Notification"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"Notification_recipientEmail_idx\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Notification_recipientEmail_idx\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "index \"Notification_recipientEmail_idx\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"Notification_recipientEmail_idx\"",
+        "sql": "CREATE INDEX \"Notification_recipientEmail_idx\" ON \"public\".\"Notification\" (\"recipientEmail\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"Notification_recipientEmail_idx\" exists on \"Notification\" with the planned definition",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" INNER JOIN \"pg_index\" AS \"i\" ON \"i\".\"indexrelid\" = \"c\".\"oid\" INNER JOIN \"pg_am\" AS \"m\" ON \"m\".\"oid\" = \"c\".\"relam\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3) AND \"i\".\"indrelid\" = to_regclass($4) AND NOT (\"i\".\"indisunique\") AND \"m\".\"amname\" = $5 AND (\"i\".\"indexprs\" IS NULL AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"i\".\"indkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"i\".\"indrelid\" AND key_attribute.attnum = key_column.attnum) = ($6)::jsonb) AND \"i\".\"indpred\" IS NULL)) AS \"result\"",
+        "params": [
+          "\"public\".\"Notification_recipientEmail_idx\"",
+          "i",
+          "I",
+          "\"public\".\"Notification\"",
+          "btree",
+          "[\"recipientEmail\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.Notification.Notification_recipientEmail_readAt_idx",
+    "label": "Create index \"Notification_recipientEmail_readAt_idx\" on \"Notification\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "Notification_recipientEmail_readAt_idx",
+        "table": "Notification"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"Notification_recipientEmail_readAt_idx\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Notification_recipientEmail_readAt_idx\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "index \"Notification_recipientEmail_readAt_idx\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"Notification_recipientEmail_readAt_idx\"",
+        "sql": "CREATE INDEX \"Notification_recipientEmail_readAt_idx\" ON \"public\".\"Notification\" (\"recipientEmail\", \"readAt\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"Notification_recipientEmail_readAt_idx\" exists on \"Notification\" with the planned definition",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" INNER JOIN \"pg_index\" AS \"i\" ON \"i\".\"indexrelid\" = \"c\".\"oid\" INNER JOIN \"pg_am\" AS \"m\" ON \"m\".\"oid\" = \"c\".\"relam\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3) AND \"i\".\"indrelid\" = to_regclass($4) AND NOT (\"i\".\"indisunique\") AND \"m\".\"amname\" = $5 AND (\"i\".\"indexprs\" IS NULL AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"i\".\"indkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"i\".\"indrelid\" AND key_attribute.attnum = key_column.attnum) = ($6)::jsonb) AND \"i\".\"indpred\" IS NULL)) AS \"result\"",
+        "params": [
+          "\"public\".\"Notification_recipientEmail_readAt_idx\"",
+          "i",
+          "I",
+          "\"public\".\"Notification\"",
+          "btree",
+          "[\"recipientEmail\",\"readAt\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.ResidentSuggestion.ResidentSuggestion_flatId_idx",
+    "label": "Create index \"ResidentSuggestion_flatId_idx\" on \"ResidentSuggestion\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "ResidentSuggestion_flatId_idx",
+        "table": "ResidentSuggestion"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"ResidentSuggestion_flatId_idx\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"ResidentSuggestion_flatId_idx\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "index \"ResidentSuggestion_flatId_idx\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"ResidentSuggestion_flatId_idx\"",
+        "sql": "CREATE INDEX \"ResidentSuggestion_flatId_idx\" ON \"public\".\"ResidentSuggestion\" (\"flatId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"ResidentSuggestion_flatId_idx\" exists on \"ResidentSuggestion\" with the planned definition",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" INNER JOIN \"pg_index\" AS \"i\" ON \"i\".\"indexrelid\" = \"c\".\"oid\" INNER JOIN \"pg_am\" AS \"m\" ON \"m\".\"oid\" = \"c\".\"relam\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3) AND \"i\".\"indrelid\" = to_regclass($4) AND NOT (\"i\".\"indisunique\") AND \"m\".\"amname\" = $5 AND (\"i\".\"indexprs\" IS NULL AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"i\".\"indkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"i\".\"indrelid\" AND key_attribute.attnum = key_column.attnum) = ($6)::jsonb) AND \"i\".\"indpred\" IS NULL)) AS \"result\"",
+        "params": [
+          "\"public\".\"ResidentSuggestion_flatId_idx\"",
+          "i",
+          "I",
+          "\"public\".\"ResidentSuggestion\"",
+          "btree",
+          "[\"flatId\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.ResidentSuggestion.ResidentSuggestion_residentId_idx",
+    "label": "Create index \"ResidentSuggestion_residentId_idx\" on \"ResidentSuggestion\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "ResidentSuggestion_residentId_idx",
+        "table": "ResidentSuggestion"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"ResidentSuggestion_residentId_idx\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"ResidentSuggestion_residentId_idx\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "index \"ResidentSuggestion_residentId_idx\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"ResidentSuggestion_residentId_idx\"",
+        "sql": "CREATE INDEX \"ResidentSuggestion_residentId_idx\" ON \"public\".\"ResidentSuggestion\" (\"residentId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"ResidentSuggestion_residentId_idx\" exists on \"ResidentSuggestion\" with the planned definition",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" INNER JOIN \"pg_index\" AS \"i\" ON \"i\".\"indexrelid\" = \"c\".\"oid\" INNER JOIN \"pg_am\" AS \"m\" ON \"m\".\"oid\" = \"c\".\"relam\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3) AND \"i\".\"indrelid\" = to_regclass($4) AND NOT (\"i\".\"indisunique\") AND \"m\".\"amname\" = $5 AND (\"i\".\"indexprs\" IS NULL AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"i\".\"indkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"i\".\"indrelid\" AND key_attribute.attnum = key_column.attnum) = ($6)::jsonb) AND \"i\".\"indpred\" IS NULL)) AS \"result\"",
+        "params": [
+          "\"public\".\"ResidentSuggestion_residentId_idx\"",
+          "i",
+          "I",
+          "\"public\".\"ResidentSuggestion\"",
+          "btree",
+          "[\"residentId\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.ResidentSuggestion.ResidentSuggestion_status_idx",
+    "label": "Create index \"ResidentSuggestion_status_idx\" on \"ResidentSuggestion\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "ResidentSuggestion_status_idx",
+        "table": "ResidentSuggestion"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"ResidentSuggestion_status_idx\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"ResidentSuggestion_status_idx\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "index \"ResidentSuggestion_status_idx\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"ResidentSuggestion_status_idx\"",
+        "sql": "CREATE INDEX \"ResidentSuggestion_status_idx\" ON \"public\".\"ResidentSuggestion\" (\"status\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"ResidentSuggestion_status_idx\" exists on \"ResidentSuggestion\" with the planned definition",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" INNER JOIN \"pg_index\" AS \"i\" ON \"i\".\"indexrelid\" = \"c\".\"oid\" INNER JOIN \"pg_am\" AS \"m\" ON \"m\".\"oid\" = \"c\".\"relam\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3) AND \"i\".\"indrelid\" = to_regclass($4) AND NOT (\"i\".\"indisunique\") AND \"m\".\"amname\" = $5 AND (\"i\".\"indexprs\" IS NULL AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"i\".\"indkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"i\".\"indrelid\" AND key_attribute.attnum = key_column.attnum) = ($6)::jsonb) AND \"i\".\"indpred\" IS NULL)) AS \"result\"",
+        "params": [
+          "\"public\".\"ResidentSuggestion_status_idx\"",
+          "i",
+          "I",
+          "\"public\".\"ResidentSuggestion\"",
+          "btree",
+          "[\"status\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "rowLevelSecurity.public.MaintenanceRequest",
+    "label": "Enable row-level security on \"MaintenanceRequest\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "rowLevelSecurity",
+        "name": "MaintenanceRequest"
+      }
+    },
+    "precheck": [
+      {
+        "description": "check RLS is not already enabled on \"MaintenanceRequest\"",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"relnamespace\" WHERE (\"n\".\"nspname\" = $1 AND \"c\".\"relname\" = $2 AND NOT (\"c\".\"relrowsecurity\"))) AS \"result\"",
+        "params": [
+          "public",
+          "MaintenanceRequest"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "enable row-level security on \"MaintenanceRequest\"",
+        "sql": "ALTER TABLE \"public\".\"MaintenanceRequest\" ENABLE ROW LEVEL SECURITY"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify row-level security is enabled on \"MaintenanceRequest\"",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"relnamespace\" WHERE (\"n\".\"nspname\" = $1 AND \"c\".\"relname\" = $2 AND \"c\".\"relrowsecurity\")) AS \"result\"",
+        "params": [
+          "public",
+          "MaintenanceRequest"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "rowLevelSecurity.public.Notification",
+    "label": "Enable row-level security on \"Notification\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "rowLevelSecurity",
+        "name": "Notification"
+      }
+    },
+    "precheck": [
+      {
+        "description": "check RLS is not already enabled on \"Notification\"",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"relnamespace\" WHERE (\"n\".\"nspname\" = $1 AND \"c\".\"relname\" = $2 AND NOT (\"c\".\"relrowsecurity\"))) AS \"result\"",
+        "params": [
+          "public",
+          "Notification"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "enable row-level security on \"Notification\"",
+        "sql": "ALTER TABLE \"public\".\"Notification\" ENABLE ROW LEVEL SECURITY"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify row-level security is enabled on \"Notification\"",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"relnamespace\" WHERE (\"n\".\"nspname\" = $1 AND \"c\".\"relname\" = $2 AND \"c\".\"relrowsecurity\")) AS \"result\"",
+        "params": [
+          "public",
+          "Notification"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "rowLevelSecurity.public.ResidentSuggestion",
+    "label": "Enable row-level security on \"ResidentSuggestion\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "rowLevelSecurity",
+        "name": "ResidentSuggestion"
+      }
+    },
+    "precheck": [
+      {
+        "description": "check RLS is not already enabled on \"ResidentSuggestion\"",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"relnamespace\" WHERE (\"n\".\"nspname\" = $1 AND \"c\".\"relname\" = $2 AND NOT (\"c\".\"relrowsecurity\"))) AS \"result\"",
+        "params": [
+          "public",
+          "ResidentSuggestion"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "enable row-level security on \"ResidentSuggestion\"",
+        "sql": "ALTER TABLE \"public\".\"ResidentSuggestion\" ENABLE ROW LEVEL SECURITY"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify row-level security is enabled on \"ResidentSuggestion\"",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"relnamespace\" WHERE (\"n\".\"nspname\" = $1 AND \"c\".\"relname\" = $2 AND \"c\".\"relrowsecurity\")) AS \"result\"",
+        "params": [
+          "public",
+          "ResidentSuggestion"
+        ]
+      }
+    ]
+  }
+]

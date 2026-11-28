@@ -58,10 +58,10 @@ following "First run" below.
     Create a confirmed Supabase Auth user with the same email so the resident can sign in.
 
 ## Additional features migration
-After updating the application, apply [prisma/additional-features.sql](prisma/additional-features.sql) to the
-PostgreSQL database, then rerun [prisma/constraints.sql](prisma/constraints.sql). The SQL adds resident
-suggestions, maintenance requests, notifications, notice categories/pinning, and resident profile fields.
-Apply the SQL only once against a deployment database:
+The additive database migration for resident suggestions, maintenance requests, notifications, notice
+categories/pinning, and resident profile fields is in `migrations/app/`. The Prisma deploy workflow applies
+it automatically. For a manually managed database, use the project's Prisma migration process; the standalone
+SQL alternative is documented below only for operators who do not run the migration workflow.
 
 ```bash
 psql "$DIRECT_URL" -f prisma/additional-features.sql
